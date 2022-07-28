@@ -65,11 +65,7 @@ RUN yum install -y dnf --enablerepo=powertools \
     libcurl-devel \
     git
 RUN R -e 'install.packages(c("stars", "jsonlite", "curl", "lubridate"), repos = "https://cloud.r-project.org")'
-RUN pip3 install rpy2 xarray requests dask
+RUN pip3 install rpy2 xarray requests dask openeo-r-udf
 
 # original:
 USER 18585
-
-# EP: install UDF test script and run it:
-RUN git clone https://github.com/Open-EO/openeo-udf-python-to-r.git
-RUN (cd openeo-udf-python-to-r; python3 test.py)
