@@ -1,1 +1,1 @@
-run: https://github.com/Open-EO/openeo-udf-python-to-r/blob/main/test.py
+run: https://raw.githubusercontent.com/Open-EO/openeo-udf-python-to-r/main/tests/test.py
