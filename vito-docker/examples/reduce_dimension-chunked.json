@@ -1,0 +1,60 @@
+{
+  "process_graph": {
+    "load1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "bands": [
+          "B03"
+        ],
+        "id": "SENTINEL2_L2A",
+        "properties": {},
+        "spatial_extent": {
+          "east": 4.55394939600667,
+          "north": 50.840884014160935,
+          "south": 50.821704115829846,
+          "west": 4.529389378015362
+        },
+        "temporal_extent": [
+          "2021-06-01T00:00:00Z",
+          "2021-09-01T00:00:00Z"
+        ]
+      }
+    },
+    "reduce1": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "load1"
+        },
+        "dimension": "t",
+        "reducer": {
+          "process_graph": {
+            "run1": {
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "runtime": "Python",
+                "udf": "from openeo_r_udf.udf_lib import prepare_udf, execute_udf\nfrom openeo.udf import XarrayDataCube\n\nr_udf = \"\"\"\nudf_chunked = function(data, context) {\n\tmean(data)\n}\n\"\"\"\n\nudf_path = prepare_udf(r_udf, '.')\n\ndef apply_datacube(cube: XarrayDataCube, context: dict) -> XarrayDataCube:\n\t# You need to change the dimension parameter if you want to reduce the bands dimension!\n\tnew_cube = execute_udf(\"reduce_dimension\", udf_path, cube.get_array(), dimension=\"t\")\n\treturn XarrayDataCube(new_cube)\n"
+              },
+              "description": "You also need to change the dimension in the UDF code for now!",
+              "result": true
+            }
+          }
+        }
+      }
+    },
+    "save1": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "reduce1"
+        },
+        "format": "GTIFF"
+      },
+      "result": true
+    }
+  },
+  "parameters": []
+}
