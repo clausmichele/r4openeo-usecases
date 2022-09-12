@@ -36,7 +36,7 @@
                   "from_parameter": "data"
                 },
                 "runtime": "Python",
-                "udf": "from openeo_r_udf.udf_lib import prepare_udf, execute_udf\nfrom openeo.udf import XarrayDataCube\n\nr_udf = \"\"\"\nudf = function(data, context) {\n\tdo.call(pmax, data)\n}\n\"\"\"\n\nudf_path = prepare_udf(r_udf, '.')\n\ndef apply_datacube(cube: XarrayDataCube, context: dict) -> XarrayDataCube:\n\t# You need to change the dimension parameter if you want to reduce the bands dimension!\n\tnew_cube = execute_udf(\"reduce_dimension\", udf_path, cube.get_array(), dimension=\"t\")\n\treturn XarrayDataCube(new_cube)\n"
+                "udf": "from openeo_r_udf.udf_lib import prepare_udf, execute_udf\nfrom openeo.udf import XarrayDataCube\n\nr_udf = \"\"\"\nudf = function(data, context) {\n\tdo.call(pmin, data)\n}\n\"\"\"\n\nudf_path = prepare_udf(r_udf, '.')\n\ndef apply_datacube(cube: XarrayDataCube, context: dict) -> XarrayDataCube:\n\t# You need to change the dimension parameter if you want to reduce the bands dimension!\n\tnew_cube = execute_udf(\"reduce_dimension\", udf_path, cube.get_array(), dimension=\"t\")\n\treturn XarrayDataCube(new_cube)\n"
               },
               "description": "You also need to change the dimension in the UDF code for now!",
               "result": true
