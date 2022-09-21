@@ -21,12 +21,13 @@ def execute_udf(process, udf, data, dimension = None, context = None, paralleliz
             kwargs = kwargs_default.copy()
             kwargs['dimensions'] = list(data.dims)
             kwargs['labels'] = get_labels(data)
-            return xr.apply_ufunc(
-                call_r, data, kwargs = kwargs,
-                input_core_dims = [input_dims], output_core_dims = [output_dims],
-                vectorize = True
-                # exclude_dims could be useful for apply_dimension?
-            )
+            return call_r(data.values, kwargs['dimensions'], kwargs['labels'], udf_filename, process, dimension, context)
+            # return xr.apply_ufunc(
+            #     call_r, data, kwargs = kwargs,
+            #     input_core_dims = [input_dims], output_core_dims = [output_dims],
+            #     vectorize = True
+            #     # exclude_dims could be useful for apply_dimension?
+            # )
 
         if parallelize:
             # Chunk data
