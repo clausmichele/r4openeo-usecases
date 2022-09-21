@@ -4,10 +4,10 @@ udf_chunked = function(data,context, dimension='var'){
   url1      <- 'https://github.com/Open-EO/openeo-udf-python-to-r/blob/UC1_ML/models/TestModel1.rds?raw=True'
   getModel  <- readRDS(gzcon(url(url1)))
   
-  print(paste(getModel$modelInfo$label,"- Model Loaded successfully"))
+  #print(paste(getModel$modelInfo$label,"- Model Loaded successfully"))
   #data = st_as_stars(data)
-  saveRDS(data,"models/testdata_reduce_chunked.rds")
-  print(data)
+  #saveRDS(data,"models/testdata_reduce_chunked.rds")
+  #print(data)
 
   # convert the data xarray to raster
   #data <-readRDS("models/testdata_apply.rds")
@@ -18,10 +18,8 @@ udf_chunked = function(data,context, dimension='var'){
   
   
   # predicht on array - reduce_dimension, udf_chunked
-  names(data_chunk)<-caret::predictors(getModel)
-  print(data_chunk)
-  print(class(data_chunk))
-  data_chunk = data.frame(t(data_chunk))
+  names(data)<-caret::predictors(getModel)
+  data = data.frame(t(data))
   prediction <-predict(getModel, data)
   
   
@@ -36,10 +34,10 @@ udf_chunked = function(data,context, dimension='var'){
   #st<-raster::brick(s)
   #names(st)=caret::predictors(getModel)
   #prediction.raster<-predict(st,getModel)
-  print("Prediction Done")
-  print(prediction)
+  #print("Prediction Done")
+  #print(prediction)
   #write_stars(prediction.stars,"models/starsprediction_reduce_check.nc")
   print("File saved")
   # Return the raster
-  return(prediction.stars)
+  return(prediction)
 }
