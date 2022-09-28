@@ -1,0 +1,84 @@
+{
+  "parameters": [],
+  "process_graph": {
+    "1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2020-07-01T00:00:00Z",
+          "2020-09-01T00:00:00Z"
+        ],
+        "spatial_extent": {
+          "east": 10.955528043686346,
+          "south": 46.63342790903076,
+          "north": 46.639402493385234,
+          "west": 10.943620903632208
+        },
+        "id": "S2_L2A_ALPS",
+        "bands": [
+          "B02",
+          "B03",
+          "B04",
+          "B08"
+        ],
+        "properties": {}
+      }
+    },
+    "2": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        },
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "median",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "t"
+      }
+    },
+    "3": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "2"
+        },
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc1-ml-landcover/udfs/reduce_udf_chunk.R",
+                "runtime": "R"
+              },
+              "result": true
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "4": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "3"
+        },
+        "format": "GTIFF"
+      },
+      "result": true
+    }
+  }
+}
