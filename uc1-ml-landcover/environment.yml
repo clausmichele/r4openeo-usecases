@@ -22,3 +22,5 @@ dependencies:
 - libnetcdf
 - netCDF4
 - h5netcdf
+- pip:
+  openeo_r_udf
