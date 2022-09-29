@@ -1,9 +1,7 @@
 #from udf_lib import execute_udf, create_dummy_cube
 from openeo_r_udf.udf_lib import prepare_udf, execute_udf
-import pandas as pd
 import time
 import xarray as xr
-import numpy as np
 
 
 testfile = "./models/testing.nc"
@@ -32,4 +30,4 @@ def run(process, udf, dimension = None, context = None):
 
 
 print('apply model')
-run('reduce_dimension','./udfs/reduce_udf_chunk.R', dimension = 'var', context=1)
+run('reduce_dimension','./udfs/reduce_udf.R', dimension = 'var', context=1)
