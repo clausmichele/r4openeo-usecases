@@ -1,6 +1,6 @@
 # UC1 : MACHINE LEARNING LANDCOVER CLASSIFICATION
 
-blblbla 
+Uce case for implemenation of machin learning with an R UDF. Available with notebook and executable at openEO backend.  
 
 ## User Guide
 
