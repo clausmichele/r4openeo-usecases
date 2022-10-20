@@ -1,7 +1,5 @@
 # UC2: Forest Phenology/Break Detection
 
-Use case for implemenation of machin learning with an R UDF. Available with notebook and executable at openEO backend.  
-
 ## Description
 This use case shows how R UDFs are used to do advanced time series modelling which is not available through native openEO processes. 
 In this use case the `bfast` break detection method is chosen to detect breaks in forested areas. It demonstrates a blue-print how to apply
