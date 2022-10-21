@@ -16,8 +16,8 @@ Four ways:
 * openeo_platform: The udf is run on openEO platform (VITO dev backend) 
 
 Two AOIs:
-* test: A small test area within the vaja storm region for small scale testing. XX by XX pixels, XX km2
-* vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps project to test the bfast service there. XX by XX pixels, XX km2
+* test: A small test area within the vaja storm region for small scale testing. 100 by 100 pixels (10000 pixels), 1 km2
+* vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps project to test the bfast service there. 2238 by 2670 pixels (6 mio. pixels), 600 km2
 
 The data set:
 * Sentinel-2 L1C
