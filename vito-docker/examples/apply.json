@@ -1,0 +1,59 @@
+{
+  "process_graph": {
+    "load1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "bands": [
+          "B03"
+        ],
+        "id": "SENTINEL2_L2A",
+        "properties": {},
+        "spatial_extent": {
+          "west": 4.529389378015362,
+          "east": 4.55394939600667,
+          "south": 50.821704115829846,
+          "north": 50.840884014160935
+        },
+        "temporal_extent": [
+          "2021-08-01T00:00:00Z",
+          "2021-08-16T00:00:00Z"
+        ]
+      }
+    },
+    "apply1": {
+      "process_id": "apply",
+      "arguments": {
+        "data": {
+          "from_node": "load1"
+        },
+        "process": {
+          "process_graph": {
+            "run1": {
+              "arguments": {
+                "data": {
+                  "from_parameter": "x"
+                },
+                "runtime": "Python",
+                "udf": "from openeo_r_udf.udf_lib import prepare_udf, execute_udf\nfrom openeo.udf import XarrayDataCube\n\nr_udf = \"\"\"\nudf = function(x, context) {\n\tx * 0.0001\n}\n\"\"\"\n\nudf_path = prepare_udf(r_udf, '.')\n\ndef apply_datacube(cube: XarrayDataCube, context: dict) -> XarrayDataCube:\n\tnew_cube = execute_udf(\"apply\", udf_path, cube.get_array())\n\treturn XarrayDataCube(new_cube)\n"
+              },
+              "process_id": "run_udf",
+              "result": true
+            }
+          }
+        }
+      }
+    },
+    "save1": {
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "apply1"
+        },
+        "format": "GTIFF"
+      },
+      "description": "The values in the result are usually between 0 and 0.2",
+      "result": true
+    }
+  },
+  "parameters": []
+}

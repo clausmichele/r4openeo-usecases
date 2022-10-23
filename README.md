@@ -107,3 +107,6 @@ noisy S5P data through R-UDFs
 
 ## R-UDFs
 https://github.com/Open-EO/openeo-udf-python-to-r
+
+## R-Client
+https://github.com/Open-EO/openeo-r-client
