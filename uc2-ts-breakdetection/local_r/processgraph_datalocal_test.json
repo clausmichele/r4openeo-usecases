@@ -1,0 +1,157 @@
+{
+  "process_graph": {
+    "apply_UDZPD1159N": {
+      "arguments": {
+        "data": {
+          "from_node": "filter_bands_ZFZNT6007F"
+        },
+        "process": {
+          "process_graph": {
+            "divide_UUBUT7619S": {
+              "arguments": {
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 255
+              },
+              "process_id": "divide"
+            },
+            "gt_EHDBX7142O": {
+              "arguments": {
+                "x": {
+                  "from_node": "divide_UUBUT7619S"
+                },
+                "y": 0.3
+              },
+              "process_id": "gt",
+              "result": true
+            }
+          }
+        }
+      },
+      "process_id": "apply"
+    },
+    "filter_bands_ZFZNT6007F": {
+      "arguments": {
+        "bands": [
+          "CLP"
+        ],
+        "data": {
+          "from_node": "load_collection_XLRBR7478F"
+        },
+        "wavelengths": null
+      },
+      "process_id": "filter_bands"
+    },
+    "load_collection_XLRBR7478F": {
+      "arguments": {
+        "bands": [
+          "B04",
+          "B08",
+          "CLP"
+        ],
+        "id": "SENTINEL2_L2A_SENTINELHUB",
+        "spatial_extent": {
+          "east": 11.53504,
+          "north": 46.4459,
+          "south": 46.4369,
+          "west": 11.52191
+        },
+        "temporal_extent": [
+          "2016-01-01",
+          "2021-01-01"
+        ]
+      },
+      "process_id": "load_collection"
+    },
+    "mask_ZCVBY9155A": {
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_XLRBR7478F"
+        },
+        "mask": {
+          "from_node": "apply_UDZPD1159N"
+        }
+      },
+      "process_id": "mask"
+    },
+    "reduce_dimension_SRZPS2662G": {
+      "arguments": {
+        "data": {
+          "from_node": "mask_ZCVBY9155A"
+        },
+        "dimension": "bands",
+        "reducer": {
+          "process_graph": {
+            "add_QHBMA8114C": {
+              "arguments": {
+                "x": {
+                  "from_node": "array_element_WBFWE0214H"
+                },
+                "y": {
+                  "from_node": "array_element_FXVYG7631D"
+                }
+              },
+              "process_id": "add"
+            },
+            "array_element_FXVYG7631D": {
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 0,
+                "return_nodata": false
+              },
+              "process_id": "array_element"
+            },
+            "array_element_WBFWE0214H": {
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 1,
+                "return_nodata": false
+              },
+              "process_id": "array_element"
+            },
+            "divide_EVGVW7587L": {
+              "arguments": {
+                "x": {
+                  "from_node": "subtract_USETV0641M"
+                },
+                "y": {
+                  "from_node": "add_QHBMA8114C"
+                }
+              },
+              "process_id": "divide",
+              "result": true
+            },
+            "subtract_USETV0641M": {
+              "arguments": {
+                "x": {
+                  "from_node": "array_element_WBFWE0214H"
+                },
+                "y": {
+                  "from_node": "array_element_FXVYG7631D"
+                }
+              },
+              "process_id": "subtract"
+            }
+          }
+        }
+      },
+      "process_id": "reduce_dimension"
+    },
+    "save_result_LPVOJ6425E": {
+      "arguments": {
+        "data": {
+          "from_node": "reduce_dimension_SRZPS2662G"
+        },
+        "format": "netCDF",
+        "options": {}
+      },
+      "process_id": "save_result",
+      "result": true
+    }
+  }
+}
