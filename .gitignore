@@ -37,3 +37,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# uc2 to ignore
+uc2-ts-breakdetection/00_data_local/vaja.nc/*
+uc2-ts-breakdetection/00_data_local/_archive/*
