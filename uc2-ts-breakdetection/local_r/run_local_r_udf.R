@@ -10,12 +10,21 @@ library("units")
 library("lubridate")
 
 # output path ------------------------------------------------------------------
-pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r.nc"
+pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r.tif"
 
 # load input ndvi --------------------------------------------------------------
-pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/r4openeo_uc2_ndvi_mskd_small.nc"
-ndvi = stars::read_ncdf(pth_ndvi)
-st_crs(ndvi) = st_crs(32632)
+# pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/r4openeo_uc2_ndvi_mskd_small.nc"
+# ndvi = stars::read_ncdf(pth_ndvi)
+pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/test.nc/openEO.nc"
+ndvi = stars::read_stars(pth_ndvi)
+
+# prepare ndvi object
+# add crs (with read_stars, and from VITO already there)
+# st_crs(ndvi) = st_crs(32632)
+
+# convert time to proper dates
+ndvi = st_set_dimensions(.x = ndvi, which = "t", 
+                         values = lubridate::as_date(st_get_dimension_values(.x = ndvi, which = "t")))
 
 # get bfast udf ----------------------------------------------------------------
 pth_udf = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_udfs/local_r_bfast_udf.R"
@@ -30,14 +39,21 @@ dates = st_get_dimension_values(ndvi, "t")
 a = Sys.time()
 bfast_brks = st_apply(X = ndvi, MARGIN = c("x", "y"), function(x){
   bfast_udf(pixels = x, 
-              dates = dates, 
-              start_monitor = start_monitor, 
-              level = level, val = "breakpoint")
+            dates = dates, 
+            start_monitor = start_monitor, 
+            level = level, 
+            val = "breakpoint")
 })
 b = Sys.time()
 duration = b-a
 duration 
 # r4openeo_uc2_ndvi_mskd_small.nc 6 secs
+# test.nc 34 secs
+
+# quickcheck -------------------------------------------------------------------
+bfast_brks[[1]][bfast_brks[[1]] < 2018] = NA
+plot(bfast_brks)
+mapview::mapview(bfast_brks)
 
 # save result ------------------------------------------------------------------
 write_stars(obj = bfast_brks, dsn = pth_out)
