@@ -25,6 +25,34 @@ The data set:
 * 2016 to 2020
 * 10 m resolution
 
+## Timing
+
+### Test
+
+* local_r
+  * processgraph_data_local.R: 5s
+  * run_local_r_udf.r: 34
+* local_udf 
+  * processgraph_data_local.R: 5s
+  * XXX
+* openeo_eurac
+  * processgraph
+* openeo_platform
+  * processgraph
+
+### Vaja
+
+* local_r
+  * processgraph_data_local.R: 5s
+  * run_local_r_udf.r: 34
+* local_udf 
+  * processgraph_data_local.R: 5s
+  * XXX
+* openeo_eurac
+  * processgraph
+* openeo_platform
+  * processgraph
+
 ## User Guide
 
 * Create the process graph for preparing your NDVI time series
