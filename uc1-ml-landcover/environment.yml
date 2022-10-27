@@ -19,6 +19,7 @@ dependencies:
 - r-lubridate
 - r-jsonlite
 - r-curl
+- r-caret
 - libnetcdf
 - netCDF4
 - h5netcdf
