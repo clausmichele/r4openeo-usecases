@@ -1,0 +1,26 @@
+name: python-to-r-udf
+channels:
+- conda-forge
+dependencies:
+- python=3.7
+- r-base
+- libgdal
+- gdal
+- geos
+- proj
+- pip
+- dask
+- distributed
+- requests
+- numpy
+- xarray
+- rpy2
+- r-stars
+- r-lubridate
+- r-jsonlite
+- r-curl
+- libnetcdf
+- netCDF4
+- h5netcdf
+- pip:
+  openeo_r_udf
