@@ -30,10 +30,10 @@ The data set:
 ### Test
 
 * local_r
-  * processgraph_data_local.R: 5s
-  * run_local_r_udf.r: 34
+  * processgraph_data_local.R: 216 s (26126 cpusec)
+  * run_local_r_udf.r: 34 s
 * local_udf 
-  * processgraph_data_local.R: 5s
+  * processgraph_data_local.R: 216 s (26126 cpusec)
   * XXX
 * openeo_eurac
   * processgraph
@@ -43,10 +43,10 @@ The data set:
 ### Vaja
 
 * local_r
-  * processgraph_data_local.R: 5s
-  * run_local_r_udf.r: 34
+  * processgraph_data_local.R: 4775 s (933550 cpusec)
+  * run_local_r_udf.r: 4.8 h
 * local_udf 
-  * processgraph_data_local.R: 5s
+  * processgraph_data_local.R: 4775 s (933550 cpusec)
   * XXX
 * openeo_eurac
   * processgraph
@@ -58,6 +58,8 @@ The data set:
 * Create the process graph for preparing your NDVI time series
 
 * How to write the UDF
+Note: We are using `udf_chunked()`  because `bfastmonitor()` is running on arrays only. It is not optimized for matrix usage like uc1 ml for example.
+
 
 * How to insert the UDF into the process graph
 

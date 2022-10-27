@@ -10,13 +10,13 @@ library("units")
 library("lubridate")
 
 # output path ------------------------------------------------------------------
-pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r.tif"
+pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r_test.tif"
+pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r_vaja.tif"
 
 # load input ndvi --------------------------------------------------------------
-# pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/r4openeo_uc2_ndvi_mskd_small.nc"
-# ndvi = stars::read_ncdf(pth_ndvi)
 pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/test.nc/openEO.nc"
-ndvi = stars::read_stars(pth_ndvi)
+pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/vaja.nc/openEO.nc"
+ndvi = stars::read_stars(pth_ndvi, proxy = FALSE)
 
 # prepare ndvi object
 # add crs (with read_stars, and from VITO already there)
@@ -48,13 +48,17 @@ b = Sys.time()
 duration = b-a
 duration 
 # r4openeo_uc2_ndvi_mskd_small.nc 6 secs
-# test.nc 34 secs
+# test.nc 34 s
+# vaja.nc 4.8 h
+
+# save result ------------------------------------------------------------------
+write_stars(obj = bfast_brks, dsn = pth_out)
 
 # quickcheck -------------------------------------------------------------------
 bfast_brks[[1]][bfast_brks[[1]] < 2018] = NA
 plot(bfast_brks)
 mapview::mapview(bfast_brks)
 
-# save result ------------------------------------------------------------------
-write_stars(obj = bfast_brks, dsn = pth_out)
-
+# for vaja plotting only possible as proxy object
+tst = read_stars(pth_out, proxy = TRUE)
+mapview::mapview(tst)
