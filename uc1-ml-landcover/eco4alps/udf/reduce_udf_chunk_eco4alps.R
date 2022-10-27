@@ -1,7 +1,7 @@
 getModel = NULL
 
 udf_setup = function(context) {
-  url1      <- 'https://github.com/Open-EO/r4openeo-usecases/blob/main/uc1-ml-landcover/models/TestModelIntensive_RF.rds?raw=True'
+  url1      <- 'https://github.com/Open-EO/r4openeo-usecases/blob/main/uc1-ml-landcover/eco4alps/models/TestModelIntensive_RF.rds?raw=True'
   getModel  <<- readRDS(gzcon(url(url1)))
 }
 
