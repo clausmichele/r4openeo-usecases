@@ -3,7 +3,7 @@ getModel = NULL
 
 
 udf = function(data,context){
-  url1      <- 'https://github.com/Open-EO/openeo-udf-python-to-r/blob/UC1_ML/models/TestModel1.rds?raw=True'
+  url1      <- 'https://github.com/Open-EO/r4openeo-usecases/blob/main/uc1-ml-landcover/test_data/models/TestModel1.rds?raw=True'
   getModel  <<- readRDS(gzcon(url(url1)))
 #  data = data.frame(t(data))
   print(head(data))
