@@ -10,7 +10,6 @@ udf_setup = function(context) {
 udf_chunked = function(data,context){
   names(data)<-caret::predictors(getModel)
   data = data.frame(t(data))
-  print(data)
   prediction <-predict(getModel, data)
   prediction = as.numeric(prediction)
   return(prediction)
