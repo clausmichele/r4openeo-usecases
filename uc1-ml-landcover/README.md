@@ -38,9 +38,11 @@ The data set:
 ### Test
 
 * local_r
-  * run_local_r_udf.r: 34 s
-* local_udf 
-  * XXX
+  * 0.074 sec 
+* local_udf with reduce dimension udf
+  * 6.997 sec
+* local_udf with redice dimension udf chunk
+  * 32.857 sec
 * openeo_eurac
   * processgraph
 * openeo_platform
@@ -49,9 +51,11 @@ The data set:
 ### Bolzano
 
 * local_r
-  * run_local_r_udf.r: 4.8 h
-* local_udf 
-  * XXX
+  * 0.074 sec 
+* local_udf with reduce dimension udf
+  * 17.928 sec
+* local_udf with redice dimension udf chunk
+  * 32.857
 * openeo_eurac
   * processgraph
 * openeo_platform
