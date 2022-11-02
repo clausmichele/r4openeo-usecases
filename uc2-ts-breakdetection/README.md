@@ -34,11 +34,11 @@ The data set:
   * run_local_r_udf.r: 34 s
 * local_udf 
   * processgraph_data_local.R: 216 s (26126 cpusec)
-  * XXX
+  * run_bfast_udf.ipynb: 78 s
 * openeo_eurac
-  * processgraph
+  * processgraph_eurac_test.json / processgraph_eurac_test.RMD
 * openeo_platform
-  * processgraph
+  * processgraph_vito_test.json
 
 ### Vaja
 
@@ -47,11 +47,11 @@ The data set:
   * run_local_r_udf.r: 4.8 h
 * local_udf 
   * processgraph_data_local.R: 4775 s (933550 cpusec)
-  * XXX
+  *  run_bfast_udf.ipynb: XX s (>3h)
 * openeo_eurac
-  * processgraph
+  * processgraph_eurac_vaja.json 
 * openeo_platform
-  * processgraph
+  * processgraph_vito_vaja.json
 
 ## User Guide
 
