@@ -1602,7 +1602,7 @@
                 "data": {
                   "from_parameter": "data"
                 },
-                "udf": "https://github.com/Open-EO/r4openeo-usecases/blob/main/uc1-ml-landcover/udfs/reduce_udf_chunk_eco4alps.R",
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc1-ml-landcover/eco4alps/udf/reduce_udf_chunk_eco4alps.R",
                 "runtime": "R"
               }
             }
@@ -2830,4 +2830,463 @@
                   0.1,
                   0.25,
                   0.5,
-             
+                  0.75,
+                  0.9
+                ]
+              }
+            }
+          }
+        },
+        "target_dimension": "variable",
+        "data": {
+          "from_node": "reducedimension49"
+        },
+        "dimension": "DATE"
+      }
+    },
+    "mergecubes37": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension32"
+        },
+        "cube1": {
+          "from_node": "mergecubes36"
+        }
+      }
+    },
+    "mergecubes38": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension33"
+        },
+        "cube1": {
+          "from_node": "mergecubes37"
+        }
+      }
+    },
+    "mergecubes35": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "mergecubes34"
+        },
+        "cube1": {
+          "from_node": "mergecubes29"
+        }
+      }
+    },
+    "mergecubes36": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "renamelabels7"
+        },
+        "cube1": {
+          "from_node": "adddimension31"
+        }
+      }
+    },
+    "adddimension20": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension24"
+        },
+        "name": "bands",
+        "label": "B05_STD"
+      }
+    },
+    "adddimension23": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension28"
+        },
+        "name": "bands",
+        "label": "B06_MED"
+      }
+    },
+    "adddimension24": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension29"
+        },
+        "name": "bands",
+        "label": "B06_MIN"
+      }
+    },
+    "adddimension21": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension26"
+        },
+        "name": "bands",
+        "label": "B06_IQR"
+      }
+    },
+    "adddimension22": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension27"
+        },
+        "name": "bands",
+        "label": "B06_AVG"
+      }
+    },
+    "adddimension27": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension33"
+        },
+        "name": "bands",
+        "label": "B07_AVG"
+      }
+    },
+    "adddimension28": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension34"
+        },
+        "name": "bands",
+        "label": "B07_MED"
+      }
+    },
+    "adddimension25": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension30"
+        },
+        "name": "bands",
+        "label": "B06_STD"
+      }
+    },
+    "adddimension26": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension32"
+        },
+        "name": "bands",
+        "label": "B07_IQR"
+      }
+    },
+    "adddimension29": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension35"
+        },
+        "name": "bands",
+        "label": "B07_MIN"
+      }
+    },
+    "adddimension7": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension9"
+        },
+        "name": "bands",
+        "label": "B03_AVG"
+      }
+    },
+    "adddimension8": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension10"
+        },
+        "name": "bands",
+        "label": "B03_MED"
+      }
+    },
+    "adddimension5": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension6"
+        },
+        "name": "bands",
+        "label": "B02_STD"
+      }
+    },
+    "adddimension6": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension8"
+        },
+        "name": "bands",
+        "label": "B03_IQR"
+      }
+    },
+    "adddimension9": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension11"
+        },
+        "name": "bands",
+        "label": "B03_MIN"
+      }
+    },
+    "mergecubes55": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension47"
+        },
+        "cube1": {
+          "from_node": "mergecubes54"
+        }
+      }
+    },
+    "mergecubes56": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension48"
+        },
+        "cube1": {
+          "from_node": "mergecubes55"
+        }
+      }
+    },
+    "mergecubes53": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "mergecubes52"
+        },
+        "cube1": {
+          "from_node": "mergecubes47"
+        }
+      }
+    },
+    "mergecubes54": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "renamelabels10"
+        },
+        "cube1": {
+          "from_node": "adddimension46"
+        }
+      }
+    },
+    "adddimension12": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension15"
+        },
+        "name": "bands",
+        "label": "B04_AVG"
+      }
+    },
+    "mergecubes51": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension44"
+        },
+        "cube1": {
+          "from_node": "mergecubes50"
+        }
+      }
+    },
+    "adddimension13": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension16"
+        },
+        "name": "bands",
+        "label": "B04_MED"
+      }
+    },
+    "mergecubes52": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension45"
+        },
+        "cube1": {
+          "from_node": "mergecubes51"
+        }
+      }
+    },
+    "adddimension10": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension12"
+        },
+        "name": "bands",
+        "label": "B03_STD"
+      }
+    },
+    "adddimension11": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension14"
+        },
+        "name": "bands",
+        "label": "B04_IQR"
+      }
+    },
+    "mergecubes50": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension43"
+        },
+        "cube1": {
+          "from_node": "mergecubes49"
+        }
+      }
+    },
+    "adddimension16": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension20"
+        },
+        "name": "bands",
+        "label": "B05_IQR"
+      }
+    },
+    "adddimension17": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension21"
+        },
+        "name": "bands",
+        "label": "B05_AVG"
+      }
+    },
+    "adddimension14": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension17"
+        },
+        "name": "bands",
+        "label": "B04_MIN"
+      }
+    },
+    "adddimension15": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension18"
+        },
+        "name": "bands",
+        "label": "B04_STD"
+      }
+    },
+    "adddimension3": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension4"
+        },
+        "name": "bands",
+        "label": "B02_MED"
+      }
+    },
+    "mergecubes59": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "mergecubes58"
+        },
+        "cube1": {
+          "from_node": "mergecubes53"
+        }
+      }
+    },
+    "adddimension4": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension5"
+        },
+        "name": "bands",
+        "label": "B02_MIN"
+      }
+    },
+    "adddimension18": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension22"
+        },
+        "name": "bands",
+        "label": "B05_MED"
+      }
+    },
+    "adddimension1": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension2"
+        },
+        "name": "bands",
+        "label": "B02_IQR"
+      }
+    },
+    "mergecubes57": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension49"
+        },
+        "cube1": {
+          "from_node": "mergecubes56"
+        }
+      }
+    },
+    "adddimension2": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension3"
+        },
+        "name": "bands",
+        "label": "B02_AVG"
+      }
+    },
+    "adddimension19": {
+      "process_id": "add_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reducedimension23"
+        },
+        "name": "bands",
+        "label": "B05_MIN"
+      }
+    },
+    "mergecubes58": {
+      "process_id": "merge_cubes",
+      "arguments": {
+        "cube2": {
+          "from_node": "adddimension50"
+        },
+        "cube1": {
+          "from_node": "mergecubes57"
+        }
+      }
+    }
+  }
+}
