@@ -1,3 +1,5 @@
+print("global level udf script")
+
 udf_setup = function(context) {
   print("udf_setup -----")
   if (!require("bfast")) {
@@ -5,7 +7,7 @@ udf_setup = function(context) {
   }
 }
 
-suppressWarnings(suppressMessages(library("bfast", quietly = T)))
+# suppressWarnings(suppressMessages(library("bfast", quietly = T)))
 
 udf_chunked = function(data, context) {
   print("udf_chunked -----")
