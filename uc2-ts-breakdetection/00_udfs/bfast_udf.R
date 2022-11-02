@@ -1,3 +1,11 @@
+udf_setup = function(context) {
+  if (!require("bfast")) {
+    install.packages("bfast", quiet = TRUE)
+  }
+}
+
+
+
 suppressWarnings(suppressMessages(library("bfast", quietly = T)))
 
 udf_chunked = function(data, context) {
@@ -33,8 +41,3 @@ udf_chunked = function(data, context) {
   return(res) 
 }
 
-udf_setup = function(context) {
-  if (!require("bfast")) {
-    install.packages("bfast", quiet = TRUE)
-  }
-}
