@@ -45,21 +45,27 @@ The data set:
   * with reduce dimension udf chunk
     * 32.857 sec
 * openeo_eurac
-  * processgraph
+  * with reduce dimension udf
+    * 32 sec
+  * with reduce dimension udf chunk
+    * 12 sec
 * openeo_platform
   * processgraph
 
 ### Bolzano
 
 * local_r
-  * 0.074 sec 
+  * 16.74 sec 
 * local_udf 
   * with reduce dimension udf
     * 17.928 sec
-  * with redice dimension udf chunk
+  * with reduce dimension udf chunk
     * 32.857 sec
 * openeo_eurac
-  * processgraph
+  * with reduce dimension udf
+    * 163 sec
+  * with reduce dimension udf chunk
+    * ~ sec
 * openeo_platform
   * processgraph
   
