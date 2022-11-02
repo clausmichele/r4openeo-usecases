@@ -12,7 +12,7 @@ udf_setup = function(context) {
 udf_chunked = function(data, context) {
   print("udf_chunked -----")
   print("udf_chunked: mean")
-  mean(data)
+  res = mean(data)
   print("udf_chunked: done")
   return(res) 
 }
