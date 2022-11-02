@@ -23,7 +23,7 @@ Four ways:
 
 Two AOIs and models:
 * test: A small test area within the province of South Tyrol for small scale testing only with 4 features (Sentinel-2 band 2, 3, 4, 8). 
-  500 by 500 pixels (50000 pixels), 5 km2.
+  95 by 100 pixels (9500 pixels), 0.95 km2.
 * Bolzano: A bigger area spatially including a mixture of various classes: artificial lands, forests, vegetation, agricultural area and river etc. 
   This area is also used in the ECO4Alps project to test the classifaction of land use mapping. 910 by 936 pixels (85000 pixels), 8.5 km2.
   Features as similarly used in the ECO4Alps project were extracted using openEO, this was downloaded to process locally in R and the local udf example.
@@ -39,25 +39,33 @@ The data set:
 
 * local_r
   * 0.074 sec 
-* local_udf with reduce dimension udf
-  * 6.997 sec
-* local_udf with redice dimension udf chunk
-  * 32.857 sec
+* local_udf 
+  * with reduce dimension udf
+    * 6.997 sec
+  * with reduce dimension udf chunk
+    * 32.857 sec
 * openeo_eurac
-  * processgraph
+  * with reduce dimension udf
+    * 32 sec
+  * with reduce dimension udf chunk
+    * 48 sec
 * openeo_platform
   * processgraph
 
 ### Bolzano
 
 * local_r
-  * 0.074 sec 
-* local_udf with reduce dimension udf
-  * 17.928 sec
-* local_udf with redice dimension udf chunk
-  * 32.857
+  * 16.74 sec 
+* local_udf 
+  * with reduce dimension udf
+    * 17.928 sec
+  * with reduce dimension udf chunk
+    * 32.857 sec
 * openeo_eurac
-  * processgraph
+  * with reduce dimension udf
+    * 163 sec
+  * with reduce dimension udf chunk
+    * ~ sec
 * openeo_platform
   * processgraph
   
