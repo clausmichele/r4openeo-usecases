@@ -8,8 +8,11 @@ udf = function(data,context){
   colnames(data)<-caret::predictors(getModel)
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 
 >>>>>>> 6729a5afc4a89724aeba30fe107ae9390be5e4b6
+>>>>>>> a6d6fd2cf5c6fca139deaf13571b894cb58739dc
   
 
   prediction <-predict(getModel, data)
