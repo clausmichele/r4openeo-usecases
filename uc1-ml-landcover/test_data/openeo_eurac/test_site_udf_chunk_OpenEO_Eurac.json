@@ -1,0 +1,153 @@
+{
+  "parameters": [],
+  "process_graph": {
+    "1": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reduce1"
+        },
+        "reducer": {
+          "process_graph": {
+            "run1": {
+              "result": true,
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc1-ml-landcover/test_data/udf/reduce_udf_chunk.R",
+                "runtime": "R"
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "save1": {
+      "result": true,
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        },
+        "format": "GTIFF"
+      }
+    },
+    "loadcollection1": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2021-05-01",
+          "2022-05-31"
+        ],
+        "spatial_extent": {
+          "east": 11.255684226674155,
+          "south": 46.4410015193298,
+          "north": 46.449257212128174,
+          "west": 11.242998142554743
+        },
+        "id": "S2_L2A_ALPS",
+        "bands": [
+          "B02",
+          "B03",
+          "B04",
+          "B08",
+          "CLOUD_MASK"
+        ],
+        "properties": {}
+      }
+    },
+    "filterbands3": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "loadcollection1"
+        },
+        "bands": [
+          "CLOUD_MASK"
+        ]
+      }
+    },
+    "reducedimension2": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "filterbands3"
+        },
+        "reducer": {
+          "process_graph": {
+            "eq2": {
+              "result": true,
+              "process_id": "eq",
+              "arguments": {
+                "x": {
+                  "from_node": "arrayelement2"
+                },
+                "y": 1
+              }
+            },
+            "arrayelement2": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 0
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "filterbands2": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "loadcollection1"
+        },
+        "bands": [
+          "B02",
+          "B03",
+          "B04",
+          "B08"
+        ]
+      }
+    },
+    "mask2": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "filterbands2"
+        },
+        "mask": {
+          "from_node": "reducedimension2"
+        }
+      }
+    },
+    "reduce1": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "mask2"
+        },
+        "reducer": {
+          "process_graph": {
+            "1": {
+              "result": true,
+              "process_id": "median",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "t"
+      }
+    }
+  }
+}
