@@ -1,29 +1,63 @@
 {
   "process_graph": {
-    "apply_ZYPWT1570Z": {
+    "apply_UYLHF9318H": {
       "arguments": {
         "data": {
-          "from_node": "filter_bands_JBSRM6368B"
+          "from_node": "filter_bands_AHLTZ0091D"
         },
         "process": {
           "process_graph": {
-            "divide_QBKBC5959J": {
+            "eq_AWKIG4076S": {
               "arguments": {
+                "case_sensitive": true,
                 "x": {
                   "from_parameter": "x"
                 },
-                "y": 255
+                "y": 3
               },
-              "process_id": "divide"
+              "process_id": "eq"
             },
-            "gt_SBOPC1427O": {
+            "eq_GYNFJ1520G": {
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 9
+              },
+              "process_id": "eq"
+            },
+            "eq_JBBXP0711C": {
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 8
+              },
+              "process_id": "eq"
+            },
+            "or_QYFPA2363U": {
               "arguments": {
                 "x": {
-                  "from_node": "divide_QBKBC5959J"
+                  "from_node": "eq_AWKIG4076S"
                 },
-                "y": 0.3
+                "y": {
+                  "from_node": "eq_JBBXP0711C"
+                }
               },
-              "process_id": "gt",
+              "process_id": "or"
+            },
+            "or_ROLAV6929G": {
+              "arguments": {
+                "x": {
+                  "from_node": "or_QYFPA2363U"
+                },
+                "y": {
+                  "from_node": "eq_GYNFJ1520G"
+                }
+              },
+              "process_id": "or",
               "result": true
             }
           }
@@ -31,24 +65,24 @@
       },
       "process_id": "apply"
     },
-    "filter_bands_JBSRM6368B": {
+    "filter_bands_AHLTZ0091D": {
       "arguments": {
         "bands": [
-          "CLP"
+          "SCL"
         ],
         "data": {
-          "from_node": "load_collection_EQOIF2612B"
+          "from_node": "load_collection_IQMUF2288Z"
         },
         "wavelengths": null
       },
       "process_id": "filter_bands"
     },
-    "load_collection_EQOIF2612B": {
+    "load_collection_IQMUF2288Z": {
       "arguments": {
         "bands": [
           "B04",
           "B08",
-          "CLP"
+          "SCL"
         ],
         "id": "SENTINEL2_L2A_SENTINELHUB",
         "spatial_extent": {
@@ -64,37 +98,37 @@
       },
       "process_id": "load_collection"
     },
-    "mask_VUAMI6912T": {
+    "mask_XIUBC4660O": {
       "arguments": {
         "data": {
-          "from_node": "load_collection_EQOIF2612B"
+          "from_node": "load_collection_IQMUF2288Z"
         },
         "mask": {
-          "from_node": "apply_ZYPWT1570Z"
+          "from_node": "apply_UYLHF9318H"
         }
       },
       "process_id": "mask"
     },
-    "reduce_dimension_SNGXS9837S": {
+    "reduce_dimension_BWKHU6091F": {
       "arguments": {
         "data": {
-          "from_node": "mask_VUAMI6912T"
+          "from_node": "mask_XIUBC4660O"
         },
         "dimension": "bands",
         "reducer": {
           "process_graph": {
-            "add_NFWYI1504U": {
+            "add_QLNGI6108N": {
               "arguments": {
                 "x": {
-                  "from_node": "array_element_BWYBZ9213G"
+                  "from_node": "array_element_LQZDP2919Q"
                 },
                 "y": {
-                  "from_node": "array_element_YJNOR4313M"
+                  "from_node": "array_element_XBPKJ0427Z"
                 }
               },
               "process_id": "add"
             },
-            "array_element_BWYBZ9213G": {
+            "array_element_LQZDP2919Q": {
               "arguments": {
                 "data": {
                   "from_parameter": "data"
@@ -104,7 +138,7 @@
               },
               "process_id": "array_element"
             },
-            "array_element_YJNOR4313M": {
+            "array_element_XBPKJ0427Z": {
               "arguments": {
                 "data": {
                   "from_parameter": "data"
@@ -114,25 +148,25 @@
               },
               "process_id": "array_element"
             },
-            "divide_UAOCT4022A": {
+            "divide_AFGZZ6119E": {
               "arguments": {
                 "x": {
-                  "from_node": "subtract_TVFLF1132Z"
+                  "from_node": "subtract_MIBIC2833A"
                 },
                 "y": {
-                  "from_node": "add_NFWYI1504U"
+                  "from_node": "add_QLNGI6108N"
                 }
               },
               "process_id": "divide",
               "result": true
             },
-            "subtract_TVFLF1132Z": {
+            "subtract_MIBIC2833A": {
               "arguments": {
                 "x": {
-                  "from_node": "array_element_BWYBZ9213G"
+                  "from_node": "array_element_LQZDP2919Q"
                 },
                 "y": {
-                  "from_node": "array_element_YJNOR4313M"
+                  "from_node": "array_element_XBPKJ0427Z"
                 }
               },
               "process_id": "subtract"
@@ -142,10 +176,10 @@
       },
       "process_id": "reduce_dimension"
     },
-    "save_result_HWYAQ2133R": {
+    "save_result_BJDRU2015O": {
       "arguments": {
         "data": {
-          "from_node": "reduce_dimension_SNGXS9837S"
+          "from_node": "reduce_dimension_BWKHU6091F"
         },
         "format": "netCDF",
         "options": {}
