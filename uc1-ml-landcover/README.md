@@ -48,7 +48,7 @@ The data set:
   * with reduce dimension udf
     * 32 sec
   * with reduce dimension udf chunk
-    * 12 sec
+    * 48 sec
 * openeo_platform
   * processgraph
 
