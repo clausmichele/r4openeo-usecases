@@ -105,6 +105,7 @@ reduce_udf = p$reduce_dimension(data = calc_ndvi,
                                 dimension = "DATE", # at Eurac it's called DATE, at VITO "time" or "t" 
                                 reducer = function(data, context){
                                   p$run_udf(data = data, 
+                                            context = list(start_monitor = 2018),
                                             udf = pth_udf, 
                                             runtime = "R")})
 
