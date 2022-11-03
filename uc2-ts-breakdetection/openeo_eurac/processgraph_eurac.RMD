@@ -43,8 +43,8 @@ login()
 output file
 
 ```{r, name_out}
-name_out = "test.nc" 
-file_format = "netCDF" 
+name_out = "test.tif" 
+file_format = "GTiff" # "GTiff" # "netCDF"
 pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results" 
 pth_out = file.path(pth_out, name_out)
 ```
@@ -110,7 +110,7 @@ reduce_udf = p$reduce_dimension(data = calc_ndvi,
                                             runtime = "R")})
 
 
-result = p$save_result(data = reduce_udf, format="netCDF") # "GTiff" 
+result = p$save_result(data = reduce_udf, format=file_format) # "GTiff" #"netCDF"
 ```
 
 # look at the pg
