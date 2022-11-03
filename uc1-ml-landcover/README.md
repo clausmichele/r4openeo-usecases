@@ -45,6 +45,8 @@ The data set:
   * with reduce dimension udf chunk
     * 32.857 sec
 * openeo_eurac
+  * data generation
+    * 15 sec
   * with reduce dimension udf
     * 32 sec
   * with reduce dimension udf chunk
@@ -60,8 +62,10 @@ The data set:
   * with reduce dimension udf
     * 17.928 sec
   * with reduce dimension udf chunk
-    * 32.857 sec
+    * 34000 sec
 * openeo_eurac
+  * data generation
+    * 157 sec
   * with reduce dimension udf
     * 163 sec
   * with reduce dimension udf chunk
