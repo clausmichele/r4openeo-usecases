@@ -142,11 +142,11 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
 
   print("Trying synchronous process")
   graph = as(datacube_mean,"Graph")
-  compute_result(graph = graph, output_file = "data/time-series-mean.json")
+  suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-mean.json"))
   print("mean time series stored \n")
 
   graph = as(datacube_max,"Graph")
-  compute_result(graph = graph, output_file = "data/time-series-max.json")
+  suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-max.json"))
   print("max time series stored \n")
 
 # read json - add save option
@@ -340,7 +340,7 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
   print(ts_max)
   }
 
-# no2 mean
+#no2 mean
 no2 = list(range(length(ts_mean)))
 for (i in 1:length(ts_mean)){
 
