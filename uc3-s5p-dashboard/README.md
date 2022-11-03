@@ -210,7 +210,7 @@ And... as you can imagine, the server side call this value as it does with all t
  if (input$data3 == 0) return()
         input$data3
 ```
- Although, the most interesting part here is that we render the figure outputted by the algorithm, so you can see the animation (the GIF) in the shiny APP itself. The ui reference for the following renderer is a simple plotOutpiut as well. 
+ Although, the most interesting part here is that we render the figure outputted by the algorithm, so you can see the animation (the GIF) in the shiny APP itself. The ui reference for the following renderer is a simple *plotOutput()* as well. 
  
  ```R
        output$animation <- renderImage({
