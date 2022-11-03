@@ -102,7 +102,7 @@ calc_ndvi = p$reduce_dimension(data = mask_clouds,
                                  (nir-red)/(nir+red)})
 
 reduce_udf = p$reduce_dimension(data = calc_ndvi, 
-                                dimension = "time", 
+                                dimension = "DATE", # at Eurac it's called DATE, at VITO "time" or "t" 
                                 reducer = function(data, context){
                                   p$run_udf(data = data, 
                                             udf = pth_udf, 

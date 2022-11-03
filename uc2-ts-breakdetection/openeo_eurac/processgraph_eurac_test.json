@@ -202,6 +202,9 @@
                   "from_parameter": "data"
                 },
                 "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/00_udfs/bfast_udf.R",
+                "context": {
+                  "start_monitor": "2018"
+                },
                 "runtime": "R"
               }
             }
