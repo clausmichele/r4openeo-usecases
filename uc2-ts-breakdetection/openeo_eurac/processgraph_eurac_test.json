@@ -207,7 +207,7 @@
             }
           }
         },
-        "dimension": "time"
+        "dimension": "DATE"
       }
     }
   },
