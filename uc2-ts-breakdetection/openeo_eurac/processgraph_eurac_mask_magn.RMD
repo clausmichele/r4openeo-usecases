@@ -12,7 +12,7 @@ output:
 
 # Description
 
-Process graph for getting s2 ndvi from Eurac backend, masking the clouds, and running the bfast R-UDF for detecting breaks in the time series.
+Process graph for getting s2 ndvi from Eurac backend, masking the clouds, and running the bfast R-UDF for detecting breaks in the time series. Additionally refining the result with the magnitude of change! Using only one UDF that can be change it's output according to the context that is passed through to it.
 
 -   extent: either test.json (100x100 px) or vaja.json
 -   time: 2016 to 2021
@@ -32,6 +32,7 @@ library(stars)
 host = "https://openeo.eurac.edu" # "https://openeo.cloud" # "https://openeo-dev.vito.be"
 con = openeo::connect(host)
 login()
+
 # con$isConnected()
 # con$isLoggedIn()
 # describe_account()
@@ -43,7 +44,7 @@ output file
 
 ```{r, name_out}
 name_out = "test.tif" 
-name_out = "vaja.tif"
+# name_out = "vaja.tif"
 file_format = "GTiff" # "GTiff" # "netCDF"
 pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results" 
 pth_out = file.path(pth_out, name_out)
@@ -54,7 +55,7 @@ path to spatial extent
 
 ```{r, path_ext}
 pth_ext = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_extent/test.json"
-pth_ext = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_extent/vaja.json"
+# pth_ext = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_extent/vaja.json"
 ```
 
 path to udf
@@ -76,26 +77,33 @@ bands_cloud = "SCL"
 # define process graph 
 ```{r, processgraph}
 p = openeo::processes()
+
 data = p$load_collection(id = collection, 
                          spatial_extent = list(west = spatial_extent$spatial_extent$west, 
                                                east = spatial_extent$spatial_extent$east, 
                                                south = spatial_extent$spatial_extent$south, 
                                                north = spatial_extent$spatial_extent$north),
                          temporal_extent = time_range, bands = bands)
+
 data_clouds = p$filter_bands(data = data, bands = bands_cloud)
+
 fun_cloud_mask = function(data, context) { 
   scl = data 
   res = scl == 3 | scl == 8 | scl == 9 
   return(res)
   }
+
 cloud_mask = p$apply(data = data_clouds, process = fun_cloud_mask)
+
 mask_clouds = p$mask(data = data, mask = cloud_mask)
+
 calc_ndvi = p$reduce_dimension(data = mask_clouds, 
                                dimension = "bands", 
                                reducer = function(data, context) { 
                                  red = data[1] 
                                  nir = data[2] 
                                  (nir-red)/(nir+red)})
+
 reduce_udf = p$reduce_dimension(data = calc_ndvi, 
                                 dimension = "DATE", # at Eurac it's called DATE, at VITO "time" or "t" 
                                 reducer = function(data, context){
@@ -103,7 +111,27 @@ reduce_udf = p$reduce_dimension(data = calc_ndvi,
                                             context = list(start_monitor = 2018),
                                             udf = pth_udf, 
                                             runtime = "R")})
-result = p$save_result(data = reduce_udf, format=file_format) # "GTiff" #"netCDF"
+
+reduce_udf_magn = p$reduce_dimension(data = calc_ndvi, 
+                                dimension = "DATE",
+                                reducer = function(data, context){
+                                  p$run_udf(data = data, 
+                                            context = list(start_monitor = 2018, 
+                                                           val = "magnitude"),
+                                            udf = pth_udf, 
+                                            runtime = "R")})
+
+fun_magn_mask = function(data, context) { 
+  magn = data 
+  res = magn > -0.2 
+  return(res)
+  }
+
+magn_mask = p$apply(data = reduce_udf_magn, process = fun_magn_mask)
+
+mask_magn = p$mask(data = reduce_udf, mask = magn_mask)
+
+result = p$save_result(data = mask_magn, format=file_format) # "GTiff" #"netCDF"
 ```
 
 # look at the pg
