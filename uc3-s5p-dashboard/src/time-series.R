@@ -51,12 +51,36 @@ s = 46.15
 e = 6.11
 n = 46.17
 
+# bolzano
+w = 10.35
+s = 46.10
+e = 12.55
+n = 47.13
+
 ## time extent
-date1 = "2018-07-01"
-date2 = "2018-10-31"
+date1 = "2019-01-01"
+date2 = "2019-12-31"
+
+checkbox = "terrascope"
+checkbox = "sentinelhub"
 
 ## cloud cover value (>=)
-value = 0.5
+if (checkbox == "sentinelhub"){
+  value = 0.5
+  }
+
+## using terrascope ...
+if (checkbox == "terrascope"){
+  # acquire data for the extent
+  datacube = p$load_collection(
+    id = "TERRASCOPE_S5P_L3_NO2_TD_V1",
+    spatial_extent = list(west = w, south = s, east = e, north = n),
+    temporal_extent=c(date1, date2),
+    bands=c("NO2")
+  )
+}
+
+if (checkbox == "sentinelhub"){
 
 # acquire data for the extent
 datacube_no2 = p$load_collection(
@@ -65,7 +89,6 @@ datacube_no2 = p$load_collection(
                temporal_extent=c(date1, date2),
                bands=c("NO2")
              )
-
 datacube = p$load_collection(
                id = "SENTINEL_5P_L2",
                spatial_extent = list(west = w, south = s, east = e, north = n),
@@ -95,7 +118,9 @@ cloud_threshold <- p$apply(data = datacube, process = threshold_)
 # mask the cloud cover with the calculated mask
 datacube <- p$mask(datacube_no2, cloud_threshold)
 
-# interpolate where nodata
+}
+
+# # interpolate where nodata
 interpolate = function(data,context) {
   return(p$array_interpolate_linear(data = data))
 }
@@ -103,14 +128,17 @@ interpolate = function(data,context) {
 datacube = p$apply_dimension(process = interpolate,
                data = datacube, dimension = "t"
                )
-###
-# moving average
-#process1 = function(data, context = NULL) {
- # reduce1 = p$reduce_dimension(data = data, dimension = "t", reducer = mean)
-  #reduce1
-  #}
-#datacube = p$apply_neighborhood(data = datacube, size = list(list(
- #               "dimension" = "t", "value" = "P30D")), process = process1)
+
+# moving average UDF - create another datacube
+ma <- function(data, context){
+  p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
+            runtime = "Python"
+            )
+}
+
+datacube_ma = p$apply_dimension(process = ma,
+               data = datacube, dimension = "t"
+               )
 
 # compress spatial dimension
 lon = c(w, e)
@@ -134,32 +162,43 @@ polygons$anAttribute <- 4
 # aggregate spatially
 datacube_mean <- p$aggregate_spatial(data = datacube, reducer = function(data, context) { p$mean(data) }, geometries = polygons)
 datacube_max <- p$aggregate_spatial(data = datacube, reducer = function(data, context) { p$max(data) }, geometries = polygons)
+datacube_ma <- p$aggregate_spatial(data = datacube_ma, reducer = function(data, context) { p$mean(data) }, geometries = polygons)
 
 # graph results
-if ( (((e-w)+(n-s)) * 111) < 350 ){
+if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
   tryCatch({
 
+  # submit mean
   print("Trying synchronous process")
-  graph = as(datacube_mean,"Graph")
+  graph = suppressWarnings(as(datacube_mean,"Graph"))
   suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-mean.json"))
-  print("mean time series stored \n")
+  print("mean time series stored")
 
-  graph = as(datacube_max,"Graph")
+  # submit max
+  graph = suppressWarnings(as(datacube_max,"Graph"))
   suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-max.json"))
-  print("max time series stored \n")
+  print("max time series stored")
+
+  # submit moving average
+  graph = suppressWarnings(as(datacube_ma,"Graph"))
+  suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-ma.json"))
+  print("moving average time series stored")
 
 # read json - add save option
-  ts_mean = fromJSON(file = "time-series-mean.json")
-  ts_max = fromJSON(file = "time-series-max.json")
+  ts_mean = fromJSON(file = "data/time-series-mean.json")
+  ts_max = fromJSON(file = "data/time-series-max.json")
+  ts_ma = fromJSON(file = "data/time-series-ma.json")
   print("time series read")
 
   }, error = function(e) {
 
     message(e)
-    print("Synchronous process failed : queuing computation... \n")
+    print("Synchronous process failed : queuing computation...")
     print("it may take a while... \n")
     formats = list_file_formats()
+
+    # submit mean
     result = p$save_result(data = datacube_mean,
                            format = formats$output$JSON)
     job = create_job(graph=result, title = "time-series-mean")
@@ -190,6 +229,7 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
     ts_mean = fromJSON(file = "data/timeseries.json")
     print("mean time series read")
 
+    # submit max
     result = p$save_result(data = datacube_max,
                        format = formats$output$JSON)
     job = create_job(graph=result, title = "time-series-max")
@@ -215,6 +255,35 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
     }
 
     ts_max = fromJSON(file = "data/timeseries.json")
+    print("max time series read")
+
+    # submit moving average
+    result = p$save_result(data = datacube_ma,
+                           format = formats$output$JSON)
+    job = create_job(graph=result, title = "time-series-ma")
+    start_job(job = job)
+    jobs = list_jobs()
+    while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+
+      print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
+      Sys.sleep(60)
+
+      jobs = list_jobs()
+      if (jobs[[job$id]]$status == 'finished'){
+
+        download_results(job = job$id, folder = "data/")
+      }
+
+      if (jobs[[job$id]]$status == 'error') {
+
+        print('error!')
+
+        break
+      }
+    }
+
+    ts_ma = fromJSON(file = "data/timeseries.json")
+    print("moving average time series read")
 
 }, warning = function(w) {
 
@@ -222,6 +291,8 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
   print("Synchronous process failed : queuing computation... \n")
   print("it may take a while... \n")
   formats = list_file_formats()
+
+  # submit mean
   result = p$save_result(data = datacube_mean,
                          format = formats$output$JSON)
   job = create_job(graph=result, title = "time-series-mean")
@@ -252,9 +323,38 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
   ts_mean = fromJSON(file = "data/timeseries.json")
   print("mean time series read")
 
+  # submit max
   result = p$save_result(data = datacube_max,
                          format = formats$output$JSON)
   job = create_job(graph=result, title = "time-series-max")
+  start_job(job = job)
+  jobs = list_jobs()
+  while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+
+    print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
+    Sys.sleep(60)
+
+    jobs = list_jobs()
+    if (jobs[[job$id]]$status == 'finished'){
+      Rplot
+      download_results(job = job$id, folder = "data/")
+    }
+
+    if (jobs[[job$id]]$status == 'error') {
+
+      print('error!')
+
+      break
+    }
+  }
+
+  ts_max = fromJSON(file = "data/timeseries.json")
+  print("max time series read")
+
+  # submit moving average
+  result = p$save_result(data = datacube_ma,
+                         format = formats$output$JSON)
+  job = create_job(graph=result, title = "time-series-ma")
   start_job(job = job)
   jobs = list_jobs()
   while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
@@ -276,8 +376,8 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
     }
   }
 
-  ts_max = fromJSON(file = "data/timeseries.json")
-
+  ts_ma = fromJSON(file = "data/timeseries.json")
+  print("moving average time series read")
 })
 
 }else{
@@ -285,6 +385,8 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
   print("queuing computation... \n")
   print("it may take a while... \n")
   formats = list_file_formats()
+
+  # submit mean
   result = p$save_result(data = datacube_mean,
                          format = formats$output$JSON)
   job = create_job(graph=result, title = "time-series-mean")
@@ -313,6 +415,7 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
   print("mean time series read")
   print(ts_mean)
 
+  # submit max
   result = p$save_result(data = datacube_max,
                          format = formats$output$JSON)
   job = create_job(graph=result, title = "time-series-max")
@@ -338,6 +441,35 @@ if ( (((e-w)+(n-s)) * 111) < 350 ){
   ts_max = fromJSON(file = "data/timeseries.json")
   print("max time series read")
   print(ts_max)
+
+  # submit moving average
+  result = p$save_result(data = datacube_ma,
+                         format = formats$output$JSON)
+  job = create_job(graph=result, title = "time-series-ma")
+  start_job(job = job)
+  jobs = list_jobs()
+  while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+
+    print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
+    Sys.sleep(60)
+
+    jobs = list_jobs()
+    if (jobs[[job$id]]$status == 'finished'){
+
+      download_results(job = job$id, folder = "data/")
+    }
+
+    if (jobs[[job$id]]$status == 'error') {
+
+      print('error!')
+
+      break
+    }
+  }
+
+  ts_ma = fromJSON(file = "data/timeseries.json")
+  print("moving average time series read")
+  print(ts_ma)
   }
 
 #no2 mean
@@ -356,8 +488,18 @@ for (i in 1:length(ts_max)){
 
 }
 
+# no2 ma
+no2_ma = list(range(length(ts_ma)))
+for (i in 1:length(ts_ma)){
+
+  no2_ma[i] = ts_ma[[i]]
+
+}
+
 no2 = unlist(no2)
 no2_max = unlist(no2_max)
+no2_ma = unlist(no2_ma)
+if (checkbox == "terrascope"){no2_ma = no2_ma/10}
 time = seq(as.Date(date1), by = "days", length.out=length(no2))
 no2_k = ksmooth(time(time),no2,'normal',bandwidth=3)
 time = seq(as.Date(date1), as.Date(date2), length.out=length(no2_k$x))
@@ -374,6 +516,8 @@ scientific_notation <- function(l) {
 if (e <= 12.55 & w >= 10.35 & n <= 47.13 & s >= 46.10 &
     as.Date(date1) >= as.Date("2018-12-14") &
     as.Date(date2) <= as.Date("2021-12-31")){
+
+  print("adding local data to the plot")
 
   library(readxl)
   library(dplyr)
@@ -398,33 +542,43 @@ if (e <= 12.55 & w >= 10.35 & n <= 47.13 & s >= 46.10 &
   agg = cbind(xts_df, rowMeans(xts_df))
 
   # convert to comparable scale
-  agg = agg * 10e-7
+  if (checkbox == "sentinelhub"){agg = agg * 10e-7 * 3}
+  if (checkbox == "terrascope"){agg = agg / 10}
+
   #agg %>% head()
 
   # filter by date
   filtered = agg[paste0(date1, "/", date2)]
 
+  local_dt <- as.vector(filtered$rowMeans.xts_df.)
   time = c(time,
            seq(as.Date(date1), as.Date(date2), length.out=length(no2)),
            seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)),
+           seq(as.Date(date1), as.Date(date2), length.out=length(no2_ma)),
            seq(as.Date(date1), as.Date(date2), length.out=length(local_dt)))
 
   # to data frame
-  local_dt = as.vector(filtered$rowMeans.xts_df.)
-  data = c(no2_k$y, no2, no2_max, local_dt)
+  data = c(no2_k$y, no2, no2_max, no2_ma, local_dt)
   group = c(rep("smoothed", length(no2_k$y)),
             rep("raw", length(no2)),
             rep("maximum", length(no2_max)),
+            rep("moving average", length(no2_ma)),
             rep("local", length(local_dt)))
 
 } else{
+
+  print("no local data in the desired area")
+
   time = c(time,
            seq(as.Date(date1), as.Date(date2), length.out=length(no2)),
-           seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)))
+           seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)),
+           seq(as.Date(date1), as.Date(date2), length.out=length(no2_ma)))
+
   data = c(no2_k$y, no2, no2_max)
   group = c(rep("smoothed", length(no2_k$y)),
           rep("raw", length(no2)),
-          rep("maximum", length(no2_max)))
+          rep("maximum", length(no2_max)),
+          rep("moving avereage", length(no2_ma)))
 }
 
 df = data.frame(time, data, group)

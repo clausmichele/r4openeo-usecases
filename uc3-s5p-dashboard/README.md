@@ -1,5 +1,7 @@
 # UC3 : SENTINEL 5P DASHBOARD
 
+![Partners](fig/partners.png)
+
 An RShiny application to visualise satellite time-series of Sentinel 5P data making use of openEO Platform. There are options for plotting a time-series, a raster of snapshot and creating a spacetime animation. This document should guide on the usage and **installation** of the RShiny application, but shall also guide the creation of new RShiny applications making use of openEO platform toolbox. 
 
 ## User Guide
@@ -26,7 +28,7 @@ As you may see, there are three main tabs in the app, besides the home screen : 
 
 ### Time-Series Analyser
 
-The Time-Series Analyser allows you to see the "reduced" time series of Sentinel 5P NO2 data from a given region. The source code, outside of the [app](app.R), can be found [here](src/time-series.R). Basically, to use this function, the user can pass the coordinates of the bounding box of the area of interest, which are shown in a dynmaic map just below; but also the time frame and the cloud cover to be considered in the computation. This last one refers to the percentage (0 to 1) of values that should be really considered as cloud. It works as a quality flag. The recommendation of ESA and the Sentinel documentation is to use 0.5, our default here.
+The Time-Series Analyser allows you to see the "reduced" time series of Sentinel 5P NO2 data from a given region. The source code, outside of the [app](app.R), can be found [here](src/time-series.R). Basically, to use this function, the user can pass the coordinates of the bounding box of the area of interest, which are shown in a dynamic map just below; but also the time frame and the cloud cover to be considered in the computation. This last one refers to the percentage (0 to 1) of values that should be really considered as cloud. It works as a quality flag. The recommendation of ESA and the Sentinel documentation is to use 0.5, our default here.
 
 Once all parameters are set, you may just press the "Rocket button" to launch results. As default, the application will try to run the process synchronously, if it refers to a small area, and if it fails, it will send it as a job to be queued in a given back end.
 
@@ -46,7 +48,7 @@ The parameters present are the date for the snapshot, the cloud cover quality fl
 
 ### Spacetime Animation
 
-The spacetime animation option is, to be honest, the funniest of the functions available in the app. Here you can create and visualise your own spatiotemporal animation of S5P NO2 data. Given a starting and ending date, as well as the quality flag for cloud cover and a given country name, you may have your own personalised spacetime GIF ready for your usage. 
+The spacetime animation option is, to be honest, the funniest of the functions available in the app. Here you can create and visualise your own spatio-temporal animation of S5P NO2 data. Given a starting and ending date, as well as the quality flag for cloud cover and a given country name, you may have your own personalised spacetime GIF ready for your usage. 
 
 ![Example of One Time Snaphot](image/spacetime-animation.gif)
 
@@ -116,7 +118,6 @@ Here, we first define the "sidebar Panel", which includes all the parameters nec
 In the server side, as the algorithm has already been explained before, we'll show how we operate with the inputs from the ui, which is what's the most relevant when working with shiny. 
 
 ```R
-# Time Series ----------------------------------------------------------------
   # plot bbox
   output$mymap <- renderLeaflet({
     coords_df = data.frame(lon = c(input$w, input$e), lat = c(input$s, input$n)) %>%
@@ -139,13 +140,12 @@ In the server side, as the algorithm has already been explained before, we'll sh
   })
 ```
 
-So, here we demonstrate how the leaflet dynamic map of the bounding box is created. First of all, we make use of sf package to create a bounding (bbox()) out of the coordinates defined in the ui; then the coordinates are once again extracted from this sf object so they can be added to function call of the leaflet() function. The view is set to the centroid of the created polygon and a special trick is the fitBounds() function, which allows the map to be always inside the visual panel. 
+So, here we demonstrate how the leaflet dynamic map of the bounding box is created. First of all, we make use of sf package to create a bounding (*bbox()*) out of the coordinates defined in the ui; then the coordinates are once again extracted from this sf object so they can be added to function call of the leaflet() function. The view is set to the centroid of the created polygon and a special trick is the *fitBounds()* function, which allows the map to be always inside the visual panel. 
 
 After that, we get again the coordinates, the quality flag and the timestamps for the main algorithm:
 
-output$timeseries <- renderPlot({
-
 ```R
+output$timeseries <- renderPlot({
       if (input$data1 == 0) return()
       input$data1
       w = input$w
@@ -156,14 +156,15 @@ output$timeseries <- renderPlot({
       date2 = input$date1date2[2]
       cloud = input$cloud
 ```
-And the rest is the algorithm itself... which has been already explained before. For the "Map Maker", the main difference is that we don't define a bounding box, but the input is *textInput* of the country of interest. You can check the differences below :
+And the rest is the algorithm itself... which has been already explained before. For the "Map Maker", the main difference is that we don't define a bounding box, but the input is *textInput()* of the country of interest. You can check the differences below :
 
+```R
  tabPanel( title = "Map Maker", value = "tab3",
               sidebarLayout(
                 sidebarPanel(
                   textInput("country", "Country Name as in rnaturalearth package", value = 'switzerland'),
 
-```R
+
                   # Select time gap
                   dateRangeInput("datedate12", "Select timeframe for interpolation only", start = "2018-01-01", end = "2021-12-31",
                                  min = "2018-01-01", max = "2021-12-31", startview =  "year", weekstart = "1"),
@@ -222,9 +223,35 @@ And... as you can imagine, the server side call this value as it does with all t
  ```
  
  
+## User Defined Function (UDF)
 
+As a little "surprise" in this dashboard, we have added a user defined function (UDF). This is one of the greatest advantages, if not the greatest, of using openEO, and we make use of this dashboard, to also demonstrate how to implement a UDF, and more especially, now inside a shiny app. 
 
-As for the 
+![Moving Average Process in the context of datacubes - Source : Edzer Pebesma](fig/cube.png)
+
+The UDF defined for this rshiny app is a Moving Average one with 30 days window size. The UDF is defined as [a python script](src/udf.py) with a simple implementation of a moving average. In order to call the UDF python script, we basically make use of the process called *run_udf()*, as below :
+
+```R
+     # moving average UDF
+      ma <- function(data, context){
+        p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
+                  runtime = "Python"
+        )
+      }
+
+      datacube_ma = p$apply_dimension(process = ma,
+                                      data = datacube, dimension = "t"
+      )
+```
+
+As you can see, the python script is read as a string, using the r package *readr*. For now, the window of the moving average is hard coded, given issues in the backend, but this is also something that shall be fixed soon. 
+
+![Run App and press Enter to start the Authentication Process](fig/cube.png)
+
+## Terrascope and SentinelHub
+
+You may have seen that there's a check box in the beginning of every page of the RShiny. This check box refers to the use of Terrascope. As mentioned, before, the whole script is based on the use of Sentinel Hub, although this option has been very slow and if you just want to have a quick check on the dashboard (as a dashboard, it should also be quicker), you can use Terrascope's data and backend. The only problem with terrascope data is that there's no quality flag there. The data for NO2 in S5P are already pre-processed. It's interesting here, because we add another form of input for shiny, the *checkboxInput()*, which basically delivers a logical/boolean value, optimal defining the *load_collection()* processes later. 
+
 ## Dependencies
 
 * R 4.2.1 "Funny Looking Kid"" x86_64, linux-gnu
@@ -246,4 +273,5 @@ all packages and versions :
 * ggvis 0.4.7
 * leaflet 2.1.1
 * dplyr 1.0.10
+* readr 2.1.2
 

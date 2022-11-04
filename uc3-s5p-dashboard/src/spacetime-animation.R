@@ -31,11 +31,11 @@ p = processes()
 
 # user inputs
 country = 'switzerland'
+
 ## time extent
 date1 = "2018-01-01"
 date2 = "2018-01-31"
-## cloud cover value (>=)
-value = 0.5
+
 ##delay for spacetime animation
 delay = 0.3
 
@@ -50,8 +50,27 @@ n = st_bbox(country_sf)[4]
 date1 = "2018-06-01"
 date2 = "2018-06-31"
 
+checkbox = "terrascope"
+checkbox = "sentinelhub"
+
 ## cloud cover value (>=)
-value = 0.5
+if (checkbox == "sentinelhub"){
+  value = 0.5
+}
+
+## using terrascope ...
+if (checkbox == "terrascope"){
+
+  # acquire data for the extent
+  datacube = p$load_collection(
+    id = "TERRASCOPE_S5P_L3_NO2_TD_V1",
+    spatial_extent = list(west = w, south = s, east = e, north = n),
+    temporal_extent=c(date1, date2),
+    bands=c("NO2")
+  )
+}
+
+if (checkbox == "sentinelhub"){
 
 # acquire data for the extent
 datacube_no2 = p$load_collection(
@@ -68,7 +87,7 @@ datacube = p$load_collection(
                bands=c("CLOUD_FRACTION")
              )
 
-# 10km x 10km grid : may be optional 
+# 10km x 10km grid : may be optional
 datacube = p$resample_spatial(
                  data = datacube, resolution = 10/111
                )
@@ -89,6 +108,8 @@ cloud_threshold <- p$apply(data = datacube, process = threshold_)
 
 # mask the cloud cover with the calculated mask
 datacube <- p$mask(datacube_no2, cloud_threshold)
+
+}
 
 # interpolate where nodata
 interpolate = function(data,context) {
@@ -114,19 +135,19 @@ while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | 
 
   print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
   Sys.sleep(60)
-  
+
   jobs = list_jobs()
   if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
 
     break
   }
 }
- 
+
 files = list.files(path = "data/")
 for (i in 1:length(files)){
   if (file.exists(paste0("data/", files[i]))) {
     file.remove(paste0("data/", files[i]))
-  }  
+  }
 }
 
 print("downloading results")
@@ -152,14 +173,14 @@ for (i in 1:length(files)){
 
     png(paste0(filepath, '/', as.character(0), as.character(i),'.png'), width = 800)
     plot(mask(raster(files[i]), country_sf), col = pal,
-         axes = FALSE, 
+         axes = FALSE,
          breaks = seq(min_v, max_v, 0.1*max_v),
          main = dates[i])
     plot(st_geometry(country_sf), add = T, type = 'l', lwd = 5)
     dev.off()
 
  } else{
-   
+
    png(paste0(filepath, '/', as.character(i),'.png'), width = 800)
    plot(mask(raster(files[i]), country_sf), col = pal,
          axes = FALSE,
