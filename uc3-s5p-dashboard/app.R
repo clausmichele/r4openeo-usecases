@@ -69,6 +69,9 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
+
+          checkboxInput("terrascope", "Tick to use Terrascope in spite of Sentinel Hub", TRUE),
+
           numericInput("w", "xmin (EPSG:4326)", 10.35, min = 0, step = .01),
           numericInput("s", "ymin (EPSG:4326)", 46.10, min = 0, step = .01),
           numericInput("e", "xmax (EPSG:4326)", 12.55, min = 0, step = .01),
@@ -78,7 +81,7 @@ ui <- fluidPage(
           leafletOutput("mymap"),
 
           # Select time gap
-          dateRangeInput("date1date2", "Select timeframe", start = "2019-01-01", end = "2019-01-31",
+          dateRangeInput("date1date2", "Select timeframe", start = "2019-01-01", end = "2019-12-31",
                          min = "2019-01-01", max = "2020-12-31", startview =  "year", weekstart = "1"),
 
           numericInput("cloud", "cloud cover to be considered? (0 to 1 - 0.5 is recommended)", 0.5, min = 0, max = 1, step = .1),
@@ -97,6 +100,9 @@ ui <- fluidPage(
     tabPanel( title = "Map Maker", value = "tab3",
               sidebarLayout(
                 sidebarPanel(
+
+                  checkboxInput("terrascope", "Tick to use Terrascope in spite of Sentinel Hub", TRUE),
+
                   textInput("country", "Country Name as in rnaturalearth package", value = 'switzerland'),
 
                   # Select time gap
@@ -121,6 +127,9 @@ ui <- fluidPage(
     tabPanel(title = "Spacetime Animation", value = "tab4",
              sidebarLayout(
                sidebarPanel(
+
+                 checkboxInput("terrascope", "Tick to use Terrascope in spite of Sentinel Hub", TRUE),
+
                  textInput("country2", "Country Name as in rnaturalearth package", value = 'switzerland'),
 
                  #numericInput("w", "Bounding Box West coord. (EPSG:4326)", 6.09, min = 0, step = .01),
@@ -179,6 +188,7 @@ server <- function(input, output) {
       if (input$data1 == 0) return()
 
       input$data1
+      input$terrascope
 
       w = input$w
       s = input$s
@@ -186,7 +196,7 @@ server <- function(input, output) {
       n = input$n
       date1 = input$date1date2[1]
       date2 = input$date1date2[2]
-      cloud = input$cloud
+      if (input$terrascope == FALSE){cloud = input$cloud}
 
       print(date1)
       print(date2)
@@ -200,42 +210,54 @@ server <- function(input, output) {
       # User defined process
       p = processes()
 
-      # acquire data for the extent
-      datacube_no2 = p$load_collection(
-        id = "SENTINEL_5P_L2",
-        spatial_extent = list(west = w, south = s, east = e, north = n),
-        temporal_extent=c(date1, date2),
-        bands=c("NO2")
-      )
+      if (input$terrascope == TRUE){
+        print("using terrascope")
+        # acquire data for the extent
+        datacube = p$load_collection(
+          id = "TERRASCOPE_S5P_L3_NO2_TD_V1",
+          spatial_extent = list(west = w, south = s, east = e, north = n),
+          temporal_extent=c(date1, date2),
+          bands=c("NO2")
+        )
+      }else{
+        print("using sentinelhub")
+        # acquire data for the extent
+        datacube_no2 = p$load_collection(
+          id = "SENTINEL_5P_L2",
+          spatial_extent = list(west = w, south = s, east = e, north = n),
+          temporal_extent=c(date1, date2),
+          bands=c("NO2")
+        )
 
-      datacube = p$load_collection(
-        id = "SENTINEL_5P_L2",
-        spatial_extent = list(west = w, south = s, east = e, north = n),
-        temporal_extent=c(date1, date2),
-        bands=c("CLOUD_FRACTION")
-      )
+        datacube = p$load_collection(
+          id = "SENTINEL_5P_L2",
+          spatial_extent = list(west = w, south = s, east = e, north = n),
+          temporal_extent=c(date1, date2),
+          bands=c("CLOUD_FRACTION")
+        )
 
-      # 10km x 10km grid : may be optional
-      # datacube = p$resample_spatial(
-      #   data = datacube, resolution = 10/111
-      # )
-      #
-      # datacube_no2 = p$resample_spatial(
-      #   data = datacube_no2, resolution = 10/111
-      # )
+        # 10km x 10km grid : may be optional
+        # datacube = p$resample_spatial(
+        #   data = datacube, resolution = 10/111
+        # )
+        #
+        # datacube_no2 = p$resample_spatial(
+        #   data = datacube_no2, resolution = 10/111
+        # )
 
-      # mask for cloud cover
-      threshold_ <- function(data, context) {
+        # mask for cloud cover
+        threshold_ <- function(data, context) {
 
-        threshold <- p$gte(data[1], cloud)
-        return(threshold)
+          threshold <- p$gte(data[1], cloud)
+          return(threshold)
+        }
+
+        # apply the threshold to the cube
+        cloud_threshold <- p$apply(data = datacube, process = threshold_)
+
+        # mask the cloud cover with the calculated mask
+        datacube <- p$mask(datacube_no2, cloud_threshold)
       }
-
-      # apply the threshold to the cube
-      cloud_threshold <- p$apply(data = datacube, process = threshold_)
-
-      # mask the cloud cover with the calculated mask
-      datacube <- p$mask(datacube_no2, cloud_threshold)
 
       # interpolate where nodata
       interpolate = function(data,context) {
@@ -244,6 +266,17 @@ server <- function(input, output) {
 
       datacube = p$apply_dimension(process = interpolate,
                                    data = datacube, dimension = "t"
+      )
+
+      # moving average UDF - create another datacube
+      ma <- function(data, context){
+        p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
+                  runtime = "Python"
+        )
+      }
+
+      datacube_ma = p$apply_dimension(process = ma,
+                                      data = datacube, dimension = "t"
       )
 
       # compress spatial dimension
@@ -268,32 +301,43 @@ server <- function(input, output) {
       # aggregate spatially
       datacube_mean <- p$aggregate_spatial(data = datacube, reducer = function(data, context) { p$mean(data) }, geometries = polygons)
       datacube_max <- p$aggregate_spatial(data = datacube, reducer = function(data, context) { p$max(data) }, geometries = polygons)
+      datacube_ma <- p$aggregate_spatial(data = datacube_ma, reducer = function(data, context) { p$mean(data) }, geometries = polygons)
 
       # graph results
-      if ( (((e-w)+(n-s)) * 111) < 350 ){
+      if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
         tryCatch({
 
+          # submit mean
           print("Trying synchronous process")
           graph = suppressWarnings(as(datacube_mean,"Graph"))
           suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-mean.json"))
-          print("mean time series stored ")
+          print("mean time series stored")
 
+          # submit max
           graph = suppressWarnings(as(datacube_max,"Graph"))
           suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-max.json"))
-          print("max time series stored ")
+          print("max time series stored")
+
+          # submit moving average
+          graph = suppressWarnings(as(datacube_ma,"Graph"))
+          suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-ma.json"))
+          print("moving average time series stored")
 
           # read json - add save option
-          ts_mean = fromJSON(file = "time-series-mean.json")
-          ts_max = fromJSON(file = "time-series-max.json")
+          ts_mean = fromJSON(file = "data/time-series-mean.json")
+          ts_max = fromJSON(file = "data/time-series-max.json")
+          ts_ma = fromJSON(file = "data/time-series-ma.json")
           print("time series read")
 
         }, error = function(e) {
 
           message(e)
-          print("Synchronous process failed : queuing computation... ")
-          print("it may take a while... ")
+          print("Synchronous process failed : queuing computation...")
+          print("it may take a while... \n")
           formats = list_file_formats()
+
+          # submit mean
           result = p$save_result(data = datacube_mean,
                                  format = formats$output$JSON)
           job = create_job(graph=result, title = "time-series-mean")
@@ -303,20 +347,28 @@ server <- function(input, output) {
 
             print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
             Sys.sleep(60)
+
             jobs = list_jobs()
 
-            if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
+            if (jobs[[job$id]]$status == 'finished'){
 
+              print("downloading results")
+
+              download_results(job = job$id, folder = "data/")
+            }
+
+            if (jobs[[job$id]]$status == 'error') {
+
+              print('error!')
               break
 
             }
           }
-          print("downloading results")
-          download_results(job = job$id, folder = "data/")
+
           ts_mean = fromJSON(file = "data/timeseries.json")
           print("mean time series read")
 
-          # time-series_max
+          # submit max
           result = p$save_result(data = datacube_max,
                                  format = formats$output$JSON)
           job = create_job(graph=result, title = "time-series-max")
@@ -328,22 +380,58 @@ server <- function(input, output) {
             Sys.sleep(60)
 
             jobs = list_jobs()
-            if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
+            if (jobs[[job$id]]$status == 'finished'){
+
+              download_results(job = job$id, folder = "data/")
+            }
+
+            if (jobs[[job$id]]$status == 'error') {
+
+              print('error!')
 
               break
             }
           }
-          print("downloading results")
-          download_results(job = job$id, folder = "data/")
+
           ts_max = fromJSON(file = "data/timeseries.json")
           print("max time series read")
+
+          # submit moving average
+          result = p$save_result(data = datacube_ma,
+                                 format = formats$output$JSON)
+          job = create_job(graph=result, title = "time-series-ma")
+          start_job(job = job)
+          jobs = list_jobs()
+          while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+
+            print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
+            Sys.sleep(60)
+
+            jobs = list_jobs()
+            if (jobs[[job$id]]$status == 'finished'){
+
+              download_results(job = job$id, folder = "data/")
+            }
+
+            if (jobs[[job$id]]$status == 'error') {
+
+              print('error!')
+
+              break
+            }
+          }
+
+          ts_ma = fromJSON(file = "data/timeseries.json")
+          print("moving average time series read")
 
         }, warning = function(w) {
 
           message(e)
-          print("Synchronous process failed : queuing computation... ")
-          print("it may take a while... ")
+          print("Synchronous process failed : queuing computation... \n")
+          print("it may take a while... \n")
           formats = list_file_formats()
+
+          # submit mean
           result = p$save_result(data = datacube_mean,
                                  format = formats$output$JSON)
           job = create_job(graph=result, title = "time-series-mean")
@@ -353,20 +441,28 @@ server <- function(input, output) {
 
             print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
             Sys.sleep(60)
+
             jobs = list_jobs()
 
-            if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
+            if (jobs[[job$id]]$status == 'finished'){
 
+              print("downloading results")
+
+              download_results(job = job$id, folder = "data/")
+            }
+
+            if (jobs[[job$id]]$status == 'error') {
+
+              print('error!')
               break
 
             }
           }
-          print("downloading results")
-          download_results(job = job$id, folder = "data/")
+
           ts_mean = fromJSON(file = "data/timeseries.json")
           print("mean time series read")
 
-          # time-series-max
+          # submit max
           result = p$save_result(data = datacube_max,
                                  format = formats$output$JSON)
           job = create_job(graph=result, title = "time-series-max")
@@ -378,44 +474,87 @@ server <- function(input, output) {
             Sys.sleep(60)
 
             jobs = list_jobs()
-            if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
+            if (jobs[[job$id]]$status == 'finished'){
+              Rplot
+              download_results(job = job$id, folder = "data/")
+            }
+
+            if (jobs[[job$id]]$status == 'error') {
+
+              print('error!')
 
               break
             }
           }
-          print("downloading results")
-          download_results(job = job$id, folder = "data/")
+
           ts_max = fromJSON(file = "data/timeseries.json")
           print("max time series read")
 
+          # submit moving average
+          result = p$save_result(data = datacube_ma,
+                                 format = formats$output$JSON)
+          job = create_job(graph=result, title = "time-series-ma")
+          start_job(job = job)
+          jobs = list_jobs()
+          while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+
+            print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
+            Sys.sleep(60)
+
+            jobs = list_jobs()
+            if (jobs[[job$id]]$status == 'finished'){
+
+              download_results(job = job$id, folder = "data/")
+            }
+
+            if (jobs[[job$id]]$status == 'error') {
+
+              print('error!')
+
+              break
+            }
+          }
+
+          ts_ma = fromJSON(file = "data/timeseries.json")
+          print("moving average time series read")
         })
 
       }else{
 
-        print("queuing computation... ")
-        print("it may take a while... ")
+        print("queuing computation... \n")
+        print("it may take a while... \n")
         formats = list_file_formats()
+
+        # submit mean
         result = p$save_result(data = datacube_mean,
                                format = formats$output$JSON)
         job = create_job(graph=result, title = "time-series-mean")
         start_job(job = job)
-        jobs = list_jobs()
         while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
 
           print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
           Sys.sleep(60)
-          jobs = list_jobs()
-          if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
 
+          if (jobs[[job$id]]$status == 'finished'){
+
+            print("downloading results")
+            download_results(job = job$id, folder = "data/")
+            break
+          }
+
+          if (jobs[[job$id]]$status == 'finished') {
+
+            print('error!')
             break
 
           }
         }
-        print("downloading results")
-        download_results(job = job$id, folder = "data/")
+
         ts_mean = fromJSON(file = "data/timeseries.json")
         print("mean time series read")
+        print(ts_mean)
 
+        # submit max
         result = p$save_result(data = datacube_max,
                                format = formats$output$JSON)
         job = create_job(graph=result, title = "time-series-max")
@@ -427,116 +566,164 @@ server <- function(input, output) {
           Sys.sleep(60)
 
           jobs = list_jobs()
-          if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error'){
+          if (jobs[[job$id]]$status == 'finished'){
 
+            download_results(job = job$id, folder = "data/")
+          }
+
+          if (jobs[[job$id]]$status == 'error') {
+
+            print('error!')
             break
 
-          }
-        }
-        print("downloading results")
-        download_results(job = job$id, folder = "data/")
+          }}
         ts_max = fromJSON(file = "data/timeseries.json")
         print("max time series read")
+        print(ts_max)
+
+        # submit moving average
+        result = p$save_result(data = datacube_ma,
+                               format = formats$output$JSON)
+        job = create_job(graph=result, title = "time-series-ma")
+        start_job(job = job)
+        jobs = list_jobs()
+        while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+
+          print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
+          Sys.sleep(60)
+
+          jobs = list_jobs()
+          if (jobs[[job$id]]$status == 'finished'){
+
+            download_results(job = job$id, folder = "data/")
+          }
+
+          if (jobs[[job$id]]$status == 'error') {
+
+            print('error!')
+
+            break
+          }
         }
 
+        ts_ma = fromJSON(file = "data/timeseries.json")
+        print("moving average time series read")
+        print(ts_ma)
+      }
 
-        # no2 mean
-        no2 = list(range(length(ts_mean)))
-        for (i in 1:length(ts_mean)){
+      #no2 mean
+      no2 = list(range(length(ts_mean)))
+      for (i in 1:length(ts_mean)){
+        no2[i] = ts_mean[[i]]
+      }
 
-          no2[i] = ts_mean[[i]]
+      # no2 max
+      no2_max = list(range(length(ts_max)))
+      for (i in 1:length(ts_max)){
+        no2_max[i] = ts_max[[i]]
+      }
 
-        }
+      # no2 ma
+      no2_ma = list(range(length(ts_ma)))
+      for (i in 1:length(ts_ma)){
+        no2_ma[i] = ts_ma[[i]]
+      }
 
-        # no2 max
-        no2_max = list(range(length(ts_max)))
-        for (i in 1:length(ts_max)){
+      no2 = unlist(no2)
+      no2_max = unlist(no2_max)
+      no2_ma = unlist(no2_ma)
+      if (input$terrascope == TRUE){no2_ma = no2_ma/10}
+      time = seq(as.Date(date1), by = "days", length.out=length(no2))
+      no2_k = ksmooth(time(time),no2,'normal',bandwidth=3)
+      time = seq(as.Date(date1), as.Date(date2), length.out=length(no2_k$x))
 
-          no2_max[i] = ts_max[[i]]
+      scientific_notation <- function(l) {
 
-        }
+        l <- format(l, scientific = TRUE)
+        l <- gsub("^(.*)e", "'\\1'e", l)
+        l <- gsub("e", "%*%10^", l)
+        parse(text=l)
+      }
 
-        no2 = unlist(no2)
-        no2_max = unlist(no2_max)
-        time = seq(as.Date(date1), by = "days", length.out=length(no2))
-        no2_k = ksmooth(time(time),no2,'normal', bandwidth=3)
-        time = seq(as.Date(date1), as.Date(date2), length.out=length(no2_k$x))
+      # plotting
+      if (e <= 12.55 & w >= 10.35 & n <= 47.13 & s >= 46.10 &
+          as.Date(date1) >= as.Date("2018-12-14") &
+          as.Date(date2) <= as.Date("2021-12-31")){
 
-        scientific_notation <- function(l) {
+        print("adding local data to the plot")
 
-          l <- format(l, scientific = TRUE)
-          l <- gsub("^(.*)e", "'\\1'e", l)
-          l <- gsub("e", "%*%10^", l)
-          parse(text=l)
-        }
+        library(readxl)
+        library(dplyr)
+        library(xts)
+        library(treasuryTR)
 
-        # plotting
-        if (e <= 12.55 & w >= 10.35 & n <= 47.13 & s >= 46.10 &
-            as.Date(date1) >= as.Date("2018-12-14") &
-            as.Date(date2) <= as.Date("2021-12-31")){
+        df = read_excel("rshiny_NO2_TM75_2017-2022.xlsx")
+        df = df %>% slice(5:n()) %>% dplyr::select(2:ncol(df))
 
-          suppressPackageStartupMessages(library(readxl))
-          suppressPackageStartupMessages(library(dplyr))
-          suppressPackageStartupMessages(library(xts))
-          suppressPackageStartupMessages(library(treasuryTR))
+        df = as.data.frame(df)
+        date = as.POSIXct(seq(0,3600*24*nrow(df)-1,by=24*3600), origin="2017-01-01")
+        df$date = as.Date(date)
+        xts_df = tibble_to_xts(df)
+        storage.mode(xts_df) = "integer"
 
-          df = read_excel("rshiny_NO2_TM75_2017-2022.xlsx")
-          df = df %>% slice(5:n()) %>% dplyr::select(2:ncol(df))
+        # interpolate
+        xts_df = na.approx(xts_df)
+        xts_df = na.omit(xts_df)
+        ##xts_df %>% head()
 
-          df = as.data.frame(df)
-          date = as.POSIXct(seq(0,3600*24*nrow(df)-1,by=24*3600), origin="2017-01-01")
-          df$date = as.Date(date)
-          xts_df = tibble_to_xts(df)
-          storage.mode(xts_df) = "integer"
+        # aggregate
+        agg = cbind(xts_df, rowMeans(xts_df))
 
-          # interpolate
-          xts_df = na.approx(xts_df)
-          xts_df = na.omit(xts_df)
-          ##xts_df %>% head()
+        # convert to comparable scale
+        if (input$terrascope == FALSE){agg = agg * 10e-7 * 3
+        }else{agg = agg / 10}
 
-          # aggregate
-          agg = cbind(xts_df, rowMeans(xts_df))
+        #agg %>% head()
 
-          # convert to comparable scale
-          agg = agg * 10e-7 * 3
-          #agg %>% head()
+        # filter by date
+        filtered = agg[paste0(date1, "/", date2)]
 
-          # filter by date
-          filtered = agg[paste0(date1, "/", date2)]
-          local_dt = as.vector(filtered$rowMeans.xts_df.)
+        local_dt <- as.vector(filtered$rowMeans.xts_df.)
+        time = c(time,
+                 seq(as.Date(date1), as.Date(date2), length.out=length(no2)),
+                 seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)),
+                 seq(as.Date(date1), as.Date(date2), length.out=length(no2_ma)),
+                 seq(as.Date(date1), as.Date(date2), length.out=length(local_dt)))
 
-          time = c(time,
-                   seq(as.Date(date1), as.Date(date2), length.out=length(no2)),
-                   seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)),
-                   seq(as.Date(date1), as.Date(date2), length.out=length(local_dt)))
+        # to data frame
+        data = c(no2_k$y, no2, no2_max, no2_ma, local_dt)
+        group = c(rep("smoothed", length(no2_k$y)),
+                  rep("raw", length(no2)),
+                  rep("maximum", length(no2_max)),
+                  rep("moving average", length(no2_ma)),
+                  rep("local", length(local_dt)))
 
-          # to data frame
-          data = c(no2_k$y, no2, no2_max, local_dt)
-          group = c(rep("smoothed", length(no2_k$y)),
-                    rep("raw", length(no2)),
-                    rep("maximum", length(no2_max)),
-                    rep("local", length(local_dt)))
+      } else{
 
-        } else{
-          time = c(time,
-                   seq(as.Date(date1), as.Date(date2), length.out=length(no2)),
-                   seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)))
-          data = c(no2_k$y, no2, no2_max)
-          group = c(rep("smoothed", length(no2_k$y)),
-                    rep("raw", length(no2)),
-                    rep("maximum", length(no2_max)))
-        }
+        print("no local data in the desired area")
 
-        df = data.frame(time, data, group)
+        time = c(time,
+                 seq(as.Date(date1), as.Date(date2), length.out=length(no2)),
+                 seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)),
+                 seq(as.Date(date1), as.Date(date2), length.out=length(no2_ma)))
 
-        #png('time-series-no2.png')
-        ggplot(df, aes(x=time, y=data, group = group, col = group, linetype = group)) +
-          geom_line() +
-          scale_y_continuous(labels=scientific_notation) +
-          theme(legend.position="top") +
-          theme(legend.title = element_blank())+
-          xlab("Time") + ylab("Tropospheric NO2 Vertical Column (molec/cm²)")
-        #dev.off()
+        data = c(no2_k$y, no2, no2_max)
+        group = c(rep("smoothed", length(no2_k$y)),
+                  rep("raw", length(no2)),
+                  rep("maximum", length(no2_max)),
+                  rep("moving avereage", length(no2_ma)))
+      }
+
+      df = data.frame(time, data, group)
+
+      #png('time-series-no2.png')
+      ggplot(df, aes(x=time, y=data, group = group, col = group, linetype = group)) +
+        geom_line() +
+        scale_y_continuous(labels=scientific_notation) +
+        theme(legend.position="top") +
+        theme(legend.title = element_blank())+
+        xlab("Time") + ylab("Tropospheric NO2 Vertical Column (molec/cm²)")
+      #dev.off()
 
     })
 
@@ -547,12 +734,13 @@ server <- function(input, output) {
         if (input$data2 == 0) return()
 
         input$data2
+        input$terrascope
 
         # user inputs
         country = input$country
         date1 = input$datedate12[1]
         date2 = input$datedate12[2]
-        cloud = input$cloud
+        if (input$terrascope == FALSE){cloud = input$cloud}
         date = input$date
 
         print(date1)
@@ -575,42 +763,54 @@ server <- function(input, output) {
         e = st_bbox(country_sf)[3]
         n = st_bbox(country_sf)[4]
 
-        # acquire data for the extent
-        datacube_no2 = p$load_collection(
-          id = "SENTINEL_5P_L2",
-          spatial_extent = list(west = w, south = s, east = e, north = n),
-          temporal_extent=c(date1, date2),
-          bands=c("NO2")
-        )
+        if (input$terrascope == TRUE){
+          print("using terrascope")
+          datacube = p$load_collection(
+            id = "TERRASCOPE_S5P_L3_NO2_TD_V1",
+            spatial_extent = list(west = w, south = s, east = e, north = n),
+            temporal_extent=c(date1, date2),
+            bands=c("NO2")
+          )
+        }else{
+          print("using sentinelhub")
+          # acquire data for the extent
+          datacube_no2 = p$load_collection(
+            id = "SENTINEL_5P_L2",
+            spatial_extent = list(west = w, south = s, east = e, north = n),
+            temporal_extent=c(date1, date2),
+            bands=c("NO2")
+          )
 
-        datacube = p$load_collection(
-          id = "SENTINEL_5P_L2",
-          spatial_extent = list(west = w, south = s, east = e, north = n),
-          temporal_extent=c(date1, date2),
-          bands=c("CLOUD_FRACTION")
-        )
+          datacube = p$load_collection(
+            id = "SENTINEL_5P_L2",
+            spatial_extent = list(west = w, south = s, east = e, north = n),
+            temporal_extent=c(date1, date2),
+            bands=c("CLOUD_FRACTION")
+          )
 
-        # 10km x 10km grid : may be optional
-        datacube = p$resample_spatial(
-          data = datacube, resolution = 10/111
-        )
+          # # 10km x 10km grid : may be optional
+          # datacube = p$resample_spatial(
+          #   data = datacube, resolution = 10/111
+          # )
+          #
+          # datacube_no2 = p$resample_spatial(
+          #   data = datacube_no2, resolution = 10/111
+          # )
 
-        datacube_no2 = p$resample_spatial(
-          data = datacube_no2, resolution = 10/111
-        )
+          # mask for cloud cover
+          threshold_ <- function(data, context) {
 
-        # mask for cloud cover
-        threshold_ <- function(data, context) {
+            threshold <- p$gte(data[1], cloud)
+            return(threshold)
+          }
 
-          threshold <- p$gte(data[1], cloud)
-          return(threshold)
+          # apply the threshold to the cube
+          cloud_threshold <- p$apply(data = datacube, process = threshold_)
+
+          # mask the cloud cover with the calculated mask
+          datacube <- p$mask(datacube_no2, cloud_threshold)
+
         }
-
-        # apply the threshold to the cube
-        cloud_threshold <- p$apply(data = datacube, process = threshold_)
-
-        # mask the cloud cover with the calculated mask
-        datacube <- p$mask(datacube_no2, cloud_threshold)
 
         # interpolate where nodata
         interpolate = function(data,context) {
@@ -650,13 +850,13 @@ server <- function(input, output) {
         files = list.files(path = "data/", pattern="\\.tif$")
         for (i in 1:length(files)){
           if (file.exists(paste0("data/", files[i]))) {
-            file.remove(paste0("data/", files[i]))
+            try(file.remove(paste0("data/", files[i])))
           }
         }
 
         print("downloading results")
         download_results(job = job$id, folder = "data/")
-
+        Sys.sleep(3)
         file = list.files(path = "data/", pattern = "\\.tif$")
         rst = mask(raster(paste0("data/", file)), country_sf)
         print(rst)
@@ -686,6 +886,7 @@ server <- function(input, output) {
         if (input$data3 == 0) return()
 
         input$data3
+        input$terrascope
 
         # Collections
         collections = list_collections()
@@ -702,7 +903,7 @@ server <- function(input, output) {
         date1 = input$datedate122[1]
         date2 = input$datedate122[2]
         ## cloud cover value (>=)
-        value = input$cloud3
+        if (input$terrascope == FALSE){cloud = input$cloud3}
         ##delay for spacetime animation
         delay = input$delay
 
@@ -713,42 +914,54 @@ server <- function(input, output) {
         e = st_bbox(country_sf)[3]
         n = st_bbox(country_sf)[4]
 
-        # acquire data for the extent
-        datacube_no2 = p$load_collection(
-          id = "SENTINEL_5P_L2",
-          spatial_extent = list(west = w, south = s, east = e, north = n),
-          temporal_extent=c(date1, date2),
-          bands=c("NO2")
-        )
+        if (input$terrascope == TRUE){
+          print("using terrascope")
+          datacube = p$load_collection(
+            id = "TERRASCOPE_S5P_L3_NO2_TD_V1",
+            spatial_extent = list(west = w, south = s, east = e, north = n),
+            temporal_extent=c(date1, date2),
+            bands=c("NO2")
+          )
+        }else{
 
-        datacube = p$load_collection(
-          id = "SENTINEL_5P_L2",
-          spatial_extent = list(west = w, south = s, east = e, north = n),
-          temporal_extent=c(date1, date2),
-          bands=c("CLOUD_FRACTION")
-        )
+          print("using sentinelhub")
+          # acquire data for the extent
+          datacube_no2 = p$load_collection(
+            id = "SENTINEL_5P_L2",
+            spatial_extent = list(west = w, south = s, east = e, north = n),
+            temporal_extent=c(date1, date2),
+            bands=c("NO2")
+          )
 
-        # 10km x 10km grid : may be optional
-        datacube = p$resample_spatial(
-          data = datacube, resolution = 10/111
-        )
+          datacube = p$load_collection(
+            id = "SENTINEL_5P_L2",
+            spatial_extent = list(west = w, south = s, east = e, north = n),
+            temporal_extent=c(date1, date2),
+            bands=c("CLOUD_FRACTION")
+          )
 
-        datacube_no2 = p$resample_spatial(
-          data = datacube_no2, resolution = 10/111
-        )
+          # # 10km x 10km grid : may be optional
+          # datacube = p$resample_spatial(
+          #   data = datacube, resolution = 10/111
+          # )
+          #
+          # datacube_no2 = p$resample_spatial(
+          #   data = datacube_no2, resolution = 10/111
+          # )
 
-        # mask for cloud cover
-        threshold_ <- function(data, context) {
+          # mask for cloud cover
+          threshold_ <- function(data, context) {
 
-          threshold <- p$gte(data[1], value)
-          return(threshold)
+            threshold <- p$gte(data[1], value)
+            return(threshold)
+          }
+
+          # apply the threshold to the cube
+          cloud_threshold <- p$apply(data = datacube, process = threshold_)
+
+          # mask the cloud cover with the calculated mask
+          datacube <- p$mask(datacube_no2, cloud_threshold)
         }
-
-        # apply the threshold to the cube
-        cloud_threshold <- p$apply(data = datacube, process = threshold_)
-
-        # mask the cloud cover with the calculated mask
-        datacube <- p$mask(datacube_no2, cloud_threshold)
 
         # interpolate where nodata
         interpolate = function(data,context) {
@@ -767,7 +980,7 @@ server <- function(input, output) {
         job = create_job(graph=result, title = "time-animation-tif")
         start_job(job = job)
         jobs = list_jobs()
-        while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
+        while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' | jobs[[job$id]]$status == 'downloading results' ){
 
           print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
           Sys.sleep(60)

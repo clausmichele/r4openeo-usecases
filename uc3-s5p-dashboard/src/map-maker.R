@@ -34,8 +34,6 @@ date1 = "2020-07-01"
 date2 = "2020-07-10"
 ## plot date
 date = "2020-07-05"
-## cloud cover value (>=)
-value = 0.5
 
 # extract bbox
 country_sf = ne_countries(country = country, returnclass = "sf", scale = 'large')
@@ -43,6 +41,28 @@ w = st_bbox(country_sf)[1]
 s = st_bbox(country_sf)[2]
 e = st_bbox(country_sf)[3]
 n = st_bbox(country_sf)[4]
+
+checkbox = "terrascope"
+checkbox = "sentinelhub"
+
+## cloud cover value (>=)
+if (checkbox == "sentinelhub"){
+  value = 0.5
+}
+
+## using terrascope ...
+if (checkbox == "terrascope"){
+
+  # acquire data for the extent
+  datacube = p$load_collection(
+    id = "TERRASCOPE_S5P_L3_NO2_TD_V1",
+    spatial_extent = list(west = w, south = s, east = e, north = n),
+    temporal_extent=c(date1, date2),
+    bands=c("NO2")
+  )
+}
+
+if (checkbox == "sentinelhub"){
 
 # acquire data for the extent
 datacube_no2 = p$load_collection(
@@ -59,14 +79,14 @@ datacube = p$load_collection(
                bands=c("CLOUD_FRACTION")
              )
 
-# 10km x 10km grid : may be optional 
-datacube = p$resample_spatial(
-                 data = datacube, resolution = 10/111
-               )
-
-datacube_no2 = p$resample_spatial(
-               data = datacube_no2, resolution = 10/111
-               )
+# 10km x 10km grid : may be optional
+# datacube = p$resample_spatial(
+#                  data = datacube, resolution = 10/111
+#                )
+#
+# datacube_no2 = p$resample_spatial(
+#                data = datacube_no2, resolution = 10/111
+#                )
 
 # mask for cloud cover
 threshold_ <- function(data, context) {
@@ -80,6 +100,8 @@ cloud_threshold <- p$apply(data = datacube, process = threshold_)
 
 # mask the cloud cover with the calculated mask
 datacube <- p$mask(datacube_no2, cloud_threshold)
+
+}
 
 # interpolate where nodata
 interpolate = function(data,context) {
@@ -104,28 +126,28 @@ job = create_job(graph=result, title = 'one-snapshot-raster')
 start_job(job = job)
 jobs = list_jobs()
 while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | jobs[[job$id]]$status == 'created' ){
-    
+
     print(paste0('this may take a moment, your process is ', jobs[[job$id]]$status))
     Sys.sleep(30)
-    
+
     jobs = list_jobs()
-    
+
     if (jobs[[job$id]]$status == 'finished' | jobs[[job$id]]$status == 'error' ){
-      
+
       break
-      
+
     }
   }
 files = list.files(path = "data/", pattern="\\.tif$")
 for (i in 1:length(files)){
     if (file.exists(paste0("data/", files[i]))) {
-      file.remove(paste0("data/", files[i]))
-  }  
+      try(file.remove(paste0("data/", files[i])))
+  }
 }
-  
+
 print("downloading results")
 download_results(job = job$id, folder = "data/")
-  
+Sys.sleep(3)
 file = list.files(path = "data/", pattern = "\\.tif$")
 rst = mask(raster(paste0("data/", file)), country_sf)
 print(rst)
@@ -136,7 +158,7 @@ plot(
   rst,
   col = hcl.colors(100, palette = "inferno", alpha = NULL, rev = FALSE, fixup = TRUE),
   main = paste0('Tropospheric NO2 Vertical Column (molec/cm²)','\n', country, ' (', date, ')'),
-  axes = FALSE   
+  axes = FALSE
      )
 plot(st_geometry(country_sf), add = T, type = 'l', lwd = 5)
 #dev.off()
