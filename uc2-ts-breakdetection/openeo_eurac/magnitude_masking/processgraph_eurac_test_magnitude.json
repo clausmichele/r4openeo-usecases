@@ -1,0 +1,219 @@
+{
+  "parameters": [],
+  "process_graph": {
+    "save_result_BICVO1364K": {
+      "result": true,
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "reduce_dimension_ZDXNL8187C"
+        },
+        "format": "GTiff",
+        "options": {}
+      }
+    },
+    "reduce_dimension_PSSGV0224Z": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "mask_RWIEX0309H"
+        },
+        "reducer": {
+          "process_graph": {
+            "add_ZDXTF7163X": {
+              "process_id": "add",
+              "arguments": {
+                "x": {
+                  "from_node": "array_element_DHSOP3334X"
+                },
+                "y": {
+                  "from_node": "array_element_QLSHS9233O"
+                }
+              }
+            },
+            "subtract_UYBQI7052X": {
+              "process_id": "subtract",
+              "arguments": {
+                "x": {
+                  "from_node": "array_element_DHSOP3334X"
+                },
+                "y": {
+                  "from_node": "array_element_QLSHS9233O"
+                }
+              }
+            },
+            "divide_OJCJL0313V": {
+              "result": true,
+              "process_id": "divide",
+              "arguments": {
+                "x": {
+                  "from_node": "subtract_UYBQI7052X"
+                },
+                "y": {
+                  "from_node": "add_ZDXTF7163X"
+                }
+              }
+            },
+            "array_element_DHSOP3334X": {
+              "process_id": "array_element",
+              "arguments": {
+                "return_nodata": false,
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 1
+              }
+            },
+            "array_element_QLSHS9233O": {
+              "process_id": "array_element",
+              "arguments": {
+                "return_nodata": false,
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 0
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "filter_bands_ZMEWA1638X": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_LSZDM5846B"
+        },
+        "bands": [
+          "SCL"
+        ]
+      }
+    },
+    "mask_RWIEX0309H": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_LSZDM5846B"
+        },
+        "mask": {
+          "from_node": "apply_LTTAS8345W"
+        }
+      }
+    },
+    "load_collection_LSZDM5846B": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2016-01-01",
+          "2021-01-01"
+        ],
+        "spatial_extent": {
+          "east": 11.53504,
+          "south": 46.4369,
+          "north": 46.4459,
+          "west": 11.52191
+        },
+        "id": "S2_L2A_ALPS",
+        "bands": [
+          "B04",
+          "B08",
+          "SCL"
+        ]
+      }
+    },
+    "reduce_dimension_ZDXNL8187C": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reduce_dimension_PSSGV0224Z"
+        },
+        "reducer": {
+          "process_graph": {
+            "run_udf_YCRVB1395H": {
+              "result": true,
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/00_udfs/bfast_udf.R",
+                "context": {
+                  "val": "magnitude",
+                  "start_monitor": 2018
+                },
+                "runtime": "R"
+              }
+            }
+          }
+        },
+        "dimension": "DATE"
+      }
+    },
+    "apply_LTTAS8345W": {
+      "process_id": "apply",
+      "arguments": {
+        "process": {
+          "process_graph": {
+            "eq_LUYHX5834K": {
+              "process_id": "eq",
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 3
+              }
+            },
+            "or_BPRWW2489G": {
+              "result": true,
+              "process_id": "or",
+              "arguments": {
+                "x": {
+                  "from_node": "or_XZNKV6849Y"
+                },
+                "y": {
+                  "from_node": "eq_NDDNZ1008S"
+                }
+              }
+            },
+            "eq_ZAIWH7685G": {
+              "process_id": "eq",
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 8
+              }
+            },
+            "or_XZNKV6849Y": {
+              "process_id": "or",
+              "arguments": {
+                "x": {
+                  "from_node": "eq_LUYHX5834K"
+                },
+                "y": {
+                  "from_node": "eq_ZAIWH7685G"
+                }
+              }
+            },
+            "eq_NDDNZ1008S": {
+              "process_id": "eq",
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 9
+              }
+            }
+          }
+        },
+        "data": {
+          "from_node": "filter_bands_ZMEWA1638X"
+        }
+      }
+    }
+  }
+}

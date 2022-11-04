@@ -1,0 +1,279 @@
+{
+  "parameters": [],
+  "process_graph": {
+    "mask_CQWJM4631G": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_MGJDL6767O"
+        },
+        "mask": {
+          "from_node": "apply_OZAOO9295O"
+        }
+      }
+    },
+    "apply_LTGWK3797B": {
+      "process_id": "apply",
+      "arguments": {
+        "process": {
+          "process_graph": {
+            "gt_HDRIW2263K": {
+              "result": true,
+              "process_id": "gt",
+              "arguments": {
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": -0.2
+              }
+            }
+          }
+        },
+        "data": {
+          "from_node": "reduce_dimension_AAFZN5403M"
+        }
+      }
+    },
+    "load_collection_MGJDL6767O": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2016-01-01",
+          "2021-01-01"
+        ],
+        "spatial_extent": {
+          "east": 11.53504,
+          "south": 46.4369,
+          "north": 46.4459,
+          "west": 11.52191
+        },
+        "id": "S2_L2A_ALPS",
+        "bands": [
+          "B04",
+          "B08",
+          "SCL"
+        ]
+      }
+    },
+    "reduce_dimension_WFZQF5736Q": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reduce_dimension_YJROB8746P"
+        },
+        "reducer": {
+          "process_graph": {
+            "run_udf_OGKJO4827Y": {
+              "result": true,
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/00_udfs/bfast_udf.R",
+                "context": {
+                  "start_monitor": 2018
+                },
+                "runtime": "R"
+              }
+            }
+          }
+        },
+        "dimension": "DATE"
+      }
+    },
+    "filter_bands_JMBXN6305X": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_MGJDL6767O"
+        },
+        "bands": [
+          "SCL"
+        ]
+      }
+    },
+    "apply_OZAOO9295O": {
+      "process_id": "apply",
+      "arguments": {
+        "process": {
+          "process_graph": {
+            "eq_IUWLE6615L": {
+              "process_id": "eq",
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 8
+              }
+            },
+            "eq_PIRRB5470T": {
+              "process_id": "eq",
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 9
+              }
+            },
+            "eq_WBNRW4058S": {
+              "process_id": "eq",
+              "arguments": {
+                "case_sensitive": true,
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 3
+              }
+            },
+            "or_VGHFW4992Y": {
+              "result": true,
+              "process_id": "or",
+              "arguments": {
+                "x": {
+                  "from_node": "or_OUXIS6594M"
+                },
+                "y": {
+                  "from_node": "eq_PIRRB5470T"
+                }
+              }
+            },
+            "or_OUXIS6594M": {
+              "process_id": "or",
+              "arguments": {
+                "x": {
+                  "from_node": "eq_WBNRW4058S"
+                },
+                "y": {
+                  "from_node": "eq_IUWLE6615L"
+                }
+              }
+            }
+          }
+        },
+        "data": {
+          "from_node": "filter_bands_JMBXN6305X"
+        }
+      }
+    },
+    "mask_SMRQL5652H": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "reduce_dimension_WFZQF5736Q"
+        },
+        "mask": {
+          "from_node": "apply_LTGWK3797B"
+        }
+      }
+    },
+    "reduce_dimension_AAFZN5403M": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "reduce_dimension_YJROB8746P"
+        },
+        "reducer": {
+          "process_graph": {
+            "run_udf_RIKVQ7351R": {
+              "result": true,
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/00_udfs/bfast_udf.R",
+                "context": {
+                  "val": "magnitude",
+                  "start_monitor": 2018
+                },
+                "runtime": "R"
+              }
+            }
+          }
+        },
+        "dimension": "DATE"
+      }
+    },
+    "save_result_GGPHX2550N": {
+      "result": true,
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "mask_SMRQL5652H"
+        },
+        "format": "GTiff",
+        "options": {}
+      }
+    },
+    "reduce_dimension_YJROB8746P": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "mask_CQWJM4631G"
+        },
+        "reducer": {
+          "process_graph": {
+            "add_SZTUB1028H": {
+              "process_id": "add",
+              "arguments": {
+                "x": {
+                  "from_node": "array_element_BGLOS1278Q"
+                },
+                "y": {
+                  "from_node": "array_element_MLBWL2228J"
+                }
+              }
+            },
+            "array_element_BGLOS1278Q": {
+              "process_id": "array_element",
+              "arguments": {
+                "return_nodata": false,
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 1
+              }
+            },
+            "divide_FMPDX0468R": {
+              "result": true,
+              "process_id": "divide",
+              "arguments": {
+                "x": {
+                  "from_node": "subtract_BQTSW0393N"
+                },
+                "y": {
+                  "from_node": "add_SZTUB1028H"
+                }
+              }
+            },
+            "array_element_MLBWL2228J": {
+              "process_id": "array_element",
+              "arguments": {
+                "return_nodata": false,
+                "data": {
+                  "from_parameter": "data"
+                },
+                "index": 0
+              }
+            },
+            "subtract_BQTSW0393N": {
+              "process_id": "subtract",
+              "arguments": {
+                "x": {
+                  "from_node": "array_element_BGLOS1278Q"
+                },
+                "y": {
+                  "from_node": "array_element_MLBWL2228J"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    }
+  }
+}
