@@ -43,7 +43,7 @@ login()
 output file
 
 ```{r, name_out}
-name_out = "test.tif" 
+name_out = "test_magn_mask.tif" 
 # name_out = "vaja.tif"
 file_format = "GTiff" # "GTiff" # "netCDF"
 pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results" 
@@ -173,19 +173,3 @@ tst[[1]][tst[[1]]<2018] = NA
 mapview::mapview(tst)
 ```
 
-# timings
-Timings taken from the webeditor interface.
-
-test.tif 
-```{r, timing_test}
-a = strptime("2022-11-03 15:02:07 UTC", "%Y-%m-%d %H:%M:%S")
-b = strptime("2022-11-03 15:04:02 UTC", "%Y-%m-%d %H:%M:%S")
-a-b
-```
-
-vaja.tif
-```{r, timing_vaja}
-a = strptime("2022-11-03 15:47:21 UTC", "%Y-%m-%d %H:%M:%S")
-b = strptime("2022-11-03 15:04:02 UTC", "%Y-%m-%d %H:%M:%S")
-a-b
-```
