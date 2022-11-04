@@ -69,9 +69,11 @@ Currently the results are not refined with the magnitude layer of bfast
 ### On the fly calculation on Eurac backend
 The results of the use case can be computed directly on the fly on the 
 Eurac backend by using this process graph (and reducing the extent to a relevant forest patch).
-This allows interactive and on the fly monitoring of forest patches.
+This allows interactive and on the fly monitoring of forest patches. 
+The process graph is masking clouds, calculating the NDVI, detecting breakpoints in the timeseries, 
+estimating the magnitude of change and finally keeping the most probably detected breaktpoint timings.
 
-![webviewer_eurac](./openeo_eurac/bfast_udf_sync_eurac.jpg)
+![webviewer_eurac](./openeo_eurac/uc2_bfast.gif)
 
 ## User Guide
 
