@@ -32,37 +32,55 @@ The data set:
 * local_r
   * processgraph_data_local.R: 216 s (26126 cpusec)
   * run_local_r_udf.r: 34 s
+  * total: 250 s
 * local_udf 
   * processgraph_data_local.R: 216 s (26126 cpusec)
   * run_bfast_udf.ipynb: 78 s
+  * total: 294 s
 * openeo_eurac
-  * processgraph_eurac_test.json / processgraph_eurac.RMD
+  * processgraph_eurac_test.json / processgraph_eurac.RMD: 118 s
 * openeo_platform
-  * processgraph_vito_test.json / processgraph_vito.RMD
+  * processgraph_vito_test.json / processgraph_vito.RMD: XX s
 
 ### Vaja
 
 * local_r
-  * processgraph_data_local.R: 4775 s (933550 cpusec)
+  * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
   * run_local_r_udf.r: 4.8 h
+  * total: 6.1 h
 * local_udf 
-  * processgraph_data_local.R: 4775 s (933550 cpusec)
-  *  run_bfast_udf.ipynb: XX s (>3h)
+  * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
+  * run_bfast_udf.ipynb: XX h (>3h)
+  * total: XX h
 * openeo_eurac
   * processgraph_eurac_vaja.json 
 * openeo_platform
   * processgraph_vito_vaja.json
+
+## Results
+### Compared to ECO4Alps
+Currently the results are not refined with the magnitude layer of bfast
+
+
+### On the fly calculation on Eurac backend
+The results of the use case can be computed directly on the fly on the 
+Eurac backend by using this process graph (and reducing the extent to relevant)
+
+![webviewer_eurac](./openeo_eurac/bfast_udf_sync_eurac.jpg)
 
 ## User Guide
 
 * Create the process graph for preparing your NDVI time series
 
 * How to write the UDF
-Note: We are using `udf_chunked()`  because `bfastmonitor()` is running on arrays only. It is not optimized for matrix usage like uc1 ml for example.
-
+Note: We are using `udf_chunked()`  because `bfastmonitor()` is running on arrays only. 
+It is not optimized for matrix usage like uc1 ml for example.
 
 * How to insert the UDF into the process graph
 
+## Outlook
+The `bfast` process can be replaced by phenology packages like `phenopix` to study
+phenology. Which is also a time series modelling approach.
 
 ## Dependencies
 

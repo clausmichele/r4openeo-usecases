@@ -1,5 +1,5 @@
 ---
-title: "r4opneEO: UC2 - Timeseries break detection"
+title: "r4openEO: UC2 - Timeseries break detection"
 author: 
  - Peter Zellner, Eurac Research
 date: "02/11/2022"
@@ -44,15 +44,19 @@ output file
 
 ```{r, name_out}
 name_out = "test.tif" 
+name_out = "vaja.tif"
 file_format = "GTiff" # "GTiff" # "netCDF"
 pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results" 
 pth_out = file.path(pth_out, name_out)
+pth_out
 ```
 
 path to spatial extent
 
 ```{r, path_ext}
 pth_ext = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_extent/test.json"
+pth_ext = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_extent/vaja.json"
+
 ```
 
 path to udf
@@ -116,6 +120,7 @@ result = p$save_result(data = reduce_udf, format=file_format) # "GTiff" #"netCDF
 # look at the pg
 ```{r, look_at_pg}
 pg_json = as(result, "Process")
+pg_json
 ```
 
 
@@ -145,14 +150,25 @@ dwnld = download_results(job = job$id, folder = pth_out)
 # quick check
 
 ```{r, quick_check}
-file.size(dwnld[[1]])/1000000 # mb 
-tst = read_stars(dwnld[[1]]) 
-tst 
-plot(tst)
+file.size(dwnld[[2]])/1000000 # mb 
+tst = read_stars(dwnld[[2]]) 
+tst[[1]][tst[[1]]<2018] = NA
+mapview::mapview(tst)
 ```
 
 # timings
+Timings taken from the webeditor interface.
 
-vaja on vito-dev for 2016 to 2021 (5GB) CPU usage 933,550 cpu-seconds Wall time 4,775 seconds Memory usage 2,377,836,590 mb-seconds Sentinelhub 38,620.25 sentinelhub_processing_unit
+test.tif 
+```{r, timing_test}
+a = strptime("2022-11-03 15:02:07 UTC", "%Y-%m-%d %H:%M:%S")
+b = strptime("2022-11-03 15:04:02 UTC", "%Y-%m-%d %H:%M:%S")
+a-b
+```
 
-test on vito-dev for 2016 to 2021 (10MB) CPU usage 26,126 cpu-seconds Wall time 216 seconds Memory usage 66,473,528 mb-seconds Sentinelhub 386 sentinelhub_processing_unit
+vaja.tif
+```{r, timing_vaja}
+a = strptime("2022-11-03 15:47:21 UTC", "%Y-%m-%d %H:%M:%S")
+b = strptime("2022-11-03 15:04:02 UTC", "%Y-%m-%d %H:%M:%S")
+a-b
+```

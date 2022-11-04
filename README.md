@@ -36,9 +36,11 @@ The added value of this use-case is to:
 and R-UDF service
 
 
-## UC2: Forest Phenology/Break Detection
+## UC2: Forest Break Detection
 
 :bulb: **Timeseries modelling on pixlel level via R-UDFs**
+
+:warning: **ADAPT THIS TEXT TO BFAST USE CASE**
 
 Phenology is the study of recurrent events occurring to living organisms. In case of vegetation, the plant
 phenology generally refers to the cyclic stages of the plant growth throughout the year, so called
