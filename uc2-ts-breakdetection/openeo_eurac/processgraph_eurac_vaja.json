@@ -10,10 +10,10 @@
         ],
         "id": "S2_L2A_ALPS",
         "spatial_extent": {
-          "east": 11.53504,
-          "north": 46.4459,
-          "south": 46.4369,
-          "west": 11.52191
+          "east": 11.60992,
+          "north": 46.49561,
+          "south": 46.25908,
+          "west": 11.32563
         },
         "temporal_extent": [
           "2016-01-01",
