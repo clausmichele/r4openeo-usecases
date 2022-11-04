@@ -86,8 +86,8 @@ It is not optimized for matrix usage like uc1 ml for example.
 * How to insert the UDF into the process graph
 
 ## Outlook
-The `bfast` process can be replaced by phenology packages like `phenopix` to study
-phenology. Which is also a time series modelling approach.
+* The `bfast` process can be replaced by phenology packages like `phenopix` to study phenology. Which is also a pixel based time series modelling approach.
+* The processgraph that calculates breakpoints and masks them with the magnitude can be exposed as a User Defined Process (UDP). Any user can then use it and parametrize it to his liking (e.g. start of the modelling period, threshold for the magnitude masking, etc.)
 
 ## Dependencies
 
