@@ -63,7 +63,13 @@ The data set:
 
 ## Results
 ### Compared to ECO4Alps
-Currently the results are not refined with the magnitude layer of bfast
+
+- Link to ECO4Alps Results Repo/Service
+- Compare the tif for Vaja extent with ECO4Alps
+  - RScript
+  - Results in Readme
+- Explain difference in input data set
+- Explain difference in calculation
 
 
 ### On the fly calculation on Eurac backend
@@ -73,9 +79,9 @@ This allows interactive and on the fly monitoring of forest patches.
 The process graph is masking clouds, calculating the NDVI, detecting breakpoints in the timeseries, 
 estimating the magnitude of change and finally keeping the most probably detected breaktpoint timings.
 
-1. [Detect breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/processgraph_eurac_test.json)
-2. [Estimate magnitude of breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude.json)
-3. [Mask breakpoints with magnitude](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude_mask.json)
+1. [Detect breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/processgraph_eurac_test.json&discover=1)
+2. [Estimate magnitude of breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude.json&discover=1)
+3. [Mask breakpoints with magnitude](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude_mask.json&discover=1)
 
 ![webviewer_eurac](./openeo_eurac/magnitude_masking/uc2_bfast.gif)
 
