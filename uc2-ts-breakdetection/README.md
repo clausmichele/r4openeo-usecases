@@ -73,9 +73,9 @@ This allows interactive and on the fly monitoring of forest patches.
 The process graph is masking clouds, calculating the NDVI, detecting breakpoints in the timeseries, 
 estimating the magnitude of change and finally keeping the most probably detected breaktpoint timings.
 
-1. [Detect breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=)
-2. [Estimate magnitude of breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=)
-3. [Mask breakpoints with magnitude](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=)
+1. [Detect breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/processgraph_eurac_test.json)
+2. [Estimate magnitude of breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude.json)
+3. [Mask breakpoints with magnitude](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude_mask.json)
 
 ![webviewer_eurac](./openeo_eurac/magnitude_masking/uc2_bfast.gif)
 
