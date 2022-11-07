@@ -1,7 +1,7 @@
-print("global level udf script")
+message("global level udf script")
 
 udf_setup = function(context) {
-  print("udf_setup -----")
+  message("udf_setup -----")
   # if (!require("bfast")) {
   #   install.packages("bfast", quiet = TRUE)
   # }
@@ -10,10 +10,21 @@ udf_setup = function(context) {
 # suppressWarnings(suppressMessages(library("bfast", quietly = T)))
 
 udf_chunked = function(data, context) {
-  print("udf_chunked -----")
-  print("udf_chunked: mean")
-  res = mean(data)
-  print("udf_chunked: done")
+  message("udf_chunked -----")
+  message("udf_chunked: mean")
+  
+  res = tryCatch(
+    {
+      mean(data)
+    }, 
+    error=function(cond) {
+      message("udf_chunked: mean error. Returning 0.")
+      message(cond)
+      return(0)
+    }
+  )
+  
+  message("udf_chunked: done")
   return(res) 
 }
 
