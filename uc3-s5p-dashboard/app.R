@@ -70,7 +70,7 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
 
-          checkboxInput("terrascope", "Tick to use Terrascope in spite of Sentinel Hub", TRUE),
+          checkboxInput("terrascope", "Tick to use Terrascope instead of Sentinel Hub", TRUE),
 
           numericInput("w", "xmin (EPSG:4326)", 10.35, min = 0, step = .01),
           numericInput("s", "ymin (EPSG:4326)", 46.10, min = 0, step = .01),
