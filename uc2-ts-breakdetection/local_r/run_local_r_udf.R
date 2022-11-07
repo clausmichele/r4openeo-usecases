@@ -27,6 +27,7 @@ ndvi = st_set_dimensions(.x = ndvi, which = "t",
                          values = lubridate::as_date(st_get_dimension_values(.x = ndvi, which = "t")))
 
 # get bfast udf ----------------------------------------------------------------
+pth_udf = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_udfs/local_r_bfast_udf_debug.R"
 pth_udf = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_udfs/local_r_bfast_udf.R"
 source(pth_udf)
 
