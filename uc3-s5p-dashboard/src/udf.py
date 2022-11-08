@@ -3,7 +3,7 @@ from openeo.udf import XarrayDataCube
 r_udf = """ 
 udf = function(data, context) {
   n = 31
-  filter(t(data), rep(1:n) / n) 
+  filter(t(data), rep(1/n, n))  
   }
 """ 
 udf_path = prepare_udf(r_udf, '.') 
