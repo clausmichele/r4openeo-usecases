@@ -1,12 +1,17 @@
-# UC2: Forest Phenology/Break Detection
+# UC2: Timeseries Break Detection
 
 ## Description
 This use case shows how R UDFs are used to do advanced time series modelling which is not available through native openEO processes. 
-In this use case the `bfast` break detection method is chosen to detect breaks in forested areas. It demonstrates a blue-print how to apply
-time series modelling on  a single pixel time series. Other methods could also be used by replacing the function in the UDF, e.g. for phenology analysis 
+In this use case the `bfast::bfastmonitor` break detection method is chosen to detect breaks in forested areas. 
+It demonstrates a blue-print how to apply time series modelling on  a single pixel time series. 
+Additionally, it is shown how the `openEO` context parameter can be used to
+parametrize a UDF without recoding it. This UDF allows to pass on bfast parameters
+such as level, value and start_monitor to parametrize the functin without recoding the UDF.
+Other methods could also be used by replacing the function in the UDF, e.g. for phenology analysis 
 or time series smoothing.
 
-## Experiment
+## Benchmarking
+### Experiment
 Four ways of producing the bfast forest break detection are carried out on two different AOIs. This is mainly done for benchmarking and for demonstrating the different ways of interacting with openEO platform, the R-Client and the R-UDF library. 
 
 Four ways:
@@ -20,14 +25,13 @@ Two AOIs:
 * vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps project to test the bfast service there. 2238 by 2670 pixels (6 mio. pixels), 600 km2
 
 The data set:
-* Sentinel-2 L1C
-* Cloud masked
+* Sentinel-2 L2A collection
+* Cloud masking using S2 scene classification
 * 2016 to 2020
 * 10 m resolution
 
-## Timing
-
-### Test
+### Timing
+#### Test
 
 * local_r
   * processgraph_data_local.R: 216 s (26126 cpusec)
@@ -42,7 +46,7 @@ The data set:
 * openeo_platform
   * processgraph_vito_test.json / processgraph_vito.RMD: XX s
 
-### Vaja
+#### Vaja
 
 * local_r
   * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
@@ -59,14 +63,27 @@ The data set:
 
 ## Results
 ### Compared to ECO4Alps
-Currently the results are not refined with the magnitude layer of bfast
+
+- Link to ECO4Alps Results Repo/Service
+- Compare the tif for Vaja extent with ECO4Alps
+  - RScript
+  - Results in Readme
+- Explain difference in input data set
+- Explain difference in calculation
 
 
 ### On the fly calculation on Eurac backend
 The results of the use case can be computed directly on the fly on the 
-Eurac backend by using this process graph (and reducing the extent to relevant)
+Eurac backend by using this process graph (and reducing the extent to a relevant forest patch).
+This allows interactive and on the fly monitoring of forest patches. 
+The process graph is masking clouds, calculating the NDVI, detecting breakpoints in the timeseries, 
+estimating the magnitude of change and finally keeping the most probably detected breaktpoint timings.
 
-![webviewer_eurac](./openeo_eurac/bfast_udf_sync_eurac.jpg)
+1. [Detect breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/processgraph_eurac_test.json&discover=1)
+2. [Estimate magnitude of breakpoints](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude.json&discover=1)
+3. [Mask breakpoints with magnitude](https://editor.openeo.org/?server=https%3A%2F%2Fopeneo.eurac.edu&process=https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude_mask.json&discover=1)
+
+![webviewer_eurac](./openeo_eurac/magnitude_masking/uc2_bfast.gif)
 
 ## User Guide
 
@@ -79,11 +96,16 @@ It is not optimized for matrix usage like uc1 ml for example.
 * How to insert the UDF into the process graph
 
 ## Outlook
-The `bfast` process can be replaced by phenology packages like `phenopix` to study
-phenology. Which is also a time series modelling approach.
+* The `bfast` process can be replaced by phenology packages like `phenopix` to study phenology. Which is also a pixel based time series modelling approach.
+* The processgraph that calculates breakpoints and masks them with the magnitude can be exposed as a User Defined Process (UDP). Any user can then use it and parametrize it to his liking (e.g. start of the modelling period, threshold for the magnitude masking, etc.)
 
 ## Dependencies
 
+### Running locally in R (without UDF)
+
+### Running a local UDF backend
+
+### Running on an openEO backend
 * R version
 * RStudio version
 * all packages and versions

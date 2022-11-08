@@ -4,12 +4,10 @@ udf_setup = function(context) {
   }
 }
 
-
-
 suppressWarnings(suppressMessages(library("bfast", quietly = T)))
 
 udf_chunked = function(data, context) {
-  pixels = unlist(data) # this are 150000 pixels right now. why? Should be 500
+  pixels = unlist(data)
   dates = names(data)
 
   val = if(is.null(context) || is.null(context$val)) "breakpoint" else context$val
