@@ -4,9 +4,9 @@
       "process_id": "load_collection",
       "arguments": {
         "bands": [
-          "B04",
-          "B08",
-          "SCL"
+          "B04_10m",
+          "B08_10m",
+          "SCL_20m"
         ],
         "id": "S2_L2A_T32TPS",
         "spatial_extent": {
