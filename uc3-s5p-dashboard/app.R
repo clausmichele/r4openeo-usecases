@@ -70,7 +70,7 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
 
-          checkboxInput("terrascope", "Tick to use Terrascope in spite of Sentinel Hub", TRUE),
+          checkboxInput("terrascope", "Tick to use Terrascope instead of Sentinel Hub", TRUE),
 
           numericInput("w", "xmin (EPSG:4326)", 10.35, min = 0, step = .01),
           numericInput("s", "ymin (EPSG:4326)", 46.10, min = 0, step = .01),
@@ -269,10 +269,19 @@ server <- function(input, output) {
       )
 
       # moving average UDF - create another datacube
-      ma <- function(data, context){
-        p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
-                  runtime = "Python"
-        )
+      udf = "Python"
+      if (udf == "R"){
+        ma <- function(data, context){
+          p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
+                    runtime = "Python"
+          )
+        }
+      } else{
+        ma <- function(data, context){
+          p$run_udf(data = data, udf = readr::read_file("src/py-udf.py"),
+                    runtime = "Python"
+          )
+        }
       }
 
       datacube_ma = p$apply_dimension(process = ma,
@@ -632,7 +641,7 @@ server <- function(input, output) {
       no2 = unlist(no2)
       no2_max = unlist(no2_max)
       no2_ma = unlist(no2_ma)
-      if (input$terrascope == TRUE){no2_ma = no2_ma/10}
+      # if (input$terrascope == TRUE){no2_ma = no2_ma/10}
       time = seq(as.Date(date1), by = "days", length.out=length(no2))
       no2_k = ksmooth(time(time),no2,'normal',bandwidth=3)
       time = seq(as.Date(date1), as.Date(date2), length.out=length(no2_k$x))

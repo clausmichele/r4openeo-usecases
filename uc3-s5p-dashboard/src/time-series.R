@@ -130,10 +130,19 @@ datacube = p$apply_dimension(process = interpolate,
                )
 
 # moving average UDF - create another datacube
-ma <- function(data, context){
-  p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
+udf = "Python"
+if (udf == "R"){
+  ma <- function(data, context){
+    p$run_udf(data = data, udf = readr::read_file("src/udf.py"),
             runtime = "Python"
-            )
+    )
+  }
+} else{
+  ma <- function(data, context){
+    p$run_udf(data = data, udf = readr::read_file("src/py-udf.py"),
+              runtime = "Python"
+    )
+  }
 }
 
 datacube_ma = p$apply_dimension(process = ma,
@@ -499,7 +508,7 @@ for (i in 1:length(ts_ma)){
 no2 = unlist(no2)
 no2_max = unlist(no2_max)
 no2_ma = unlist(no2_ma)
-if (checkbox == "terrascope"){no2_ma = no2_ma/10}
+# if (checkbox == "terrascope"){no2_ma = no2_ma/10}
 time = seq(as.Date(date1), by = "days", length.out=length(no2))
 no2_k = ksmooth(time(time),no2,'normal',bandwidth=3)
 time = seq(as.Date(date1), as.Date(date2), length.out=length(no2_k$x))
