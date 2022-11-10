@@ -1,7 +1,6 @@
 message("global level udf script")
 
 udf_setup = function(context) {
-  message("udf_setup -----")
   if (!require("bfast")) {
     install.packages("bfast", quiet = TRUE)
   }
@@ -10,8 +9,6 @@ udf_setup = function(context) {
 #suppressWarnings(suppressMessages(library("bfast", quietly = T)))
 
 udf_chunked = function(data, context) {
-  message("udf_chunked -----")
-  message("udf_chunked: unlisting")
   pixels = unlist(data)
   dates = names(data)
   
