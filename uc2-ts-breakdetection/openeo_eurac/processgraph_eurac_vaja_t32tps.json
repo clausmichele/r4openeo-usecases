@@ -4,11 +4,11 @@
       "process_id": "load_collection",
       "arguments": {
         "bands": [
-          "B04",
-          "B08",
-          "SCL"
+          "B04_10m",
+          "B08_10m",
+          "SCL_20m"
         ],
-        "id": "S2_L2A_ALPS",
+        "id": "S2_L2A_T32TPS",
         "spatial_extent": {
           "east": 11.58,
           "north": 46.49561,
@@ -25,7 +25,7 @@
       "process_id": "filter_bands",
       "arguments": {
         "bands": [
-          "SCL"
+          "SCL_20m"
         ],
         "data": {
           "from_node": "load_collection_OYDDW9386H"

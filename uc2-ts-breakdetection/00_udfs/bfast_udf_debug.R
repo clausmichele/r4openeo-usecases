@@ -7,12 +7,12 @@ udf_setup = function(context) {
   }
 }
 
-# suppressWarnings(suppressMessages(library("bfast", quietly = T)))
+#suppressWarnings(suppressMessages(library("bfast", quietly = T)))
 
 udf_chunked = function(data, context) {
   message("udf_chunked -----")
   message("udf_chunked: unlisting")
-  pixels = unlist(data) # this are 150000 pixels right now. why? Should be 500
+  pixels = unlist(data)
   dates = names(data)
   
   message("udf_chunked: error handling")

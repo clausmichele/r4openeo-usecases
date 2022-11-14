@@ -42,9 +42,9 @@ The data set:
   * run_bfast_udf.ipynb: 78 s
   * total: 294 s
 * openeo_eurac
-  * processgraph_eurac_test.json / processgraph_eurac.RMD: 118 s
+  * processgraph_eurac_test.json: 118 s
 * openeo_platform
-  * processgraph_vito_test.json / processgraph_vito.RMD: XX s
+  * processgraph_vito_test.json: NA (libs not installed)
 
 #### Vaja
 
@@ -54,12 +54,12 @@ The data set:
   * total: 6.1 h
 * local_udf 
   * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
-  * run_bfast_udf.ipynb: XX h (>3h)
-  * total: XX h
+  * run_bfast_udf.ipynb: NA (runs out of memory (96GB) after 1h15)
+  * total: NA
 * openeo_eurac
-  * processgraph_eurac_vaja.json 
+  * processgraph_eurac_vaja.json: NA (currently error)
 * openeo_platform
-  * processgraph_vito_vaja.json
+  * processgraph_vito_vaja.json: NA (libs not installed)
 
 ## Results
 ### Compared to ECO4Alps
