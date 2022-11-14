@@ -249,11 +249,24 @@ The UDF defined for this rshiny app is a Moving Average one with 30 days window 
 
 As you can see, the python script is read as a string, using the r package *readr*. For now, the window of the moving average is hard coded, given issues in the backend, but this is also something that shall be fixed soon. 
 
-![Run App and press Enter to start the Authentication Process](fig/cube.png)
 
 ## Terrascope and SentinelHub
 
 You may have seen that there's a check box in the beginning of every page of the RShiny. This check box refers to the use of Terrascope. As mentioned, before, the whole script is based on the use of Sentinel Hub, although this option has been very slow and if you just want to have a quick check on the dashboard (as a dashboard, it should also be quicker), you can use Terrascope's data and backend. The only problem with terrascope data is that there's no quality flag there. The data for NO2 in S5P are already pre-processed. It's interesting here, because we add another form of input for shiny, the *checkboxInput()*, which basically delivers a logical/boolean value, optimal defining the *load_collection()* processes later. 
+
+## Benchmarking
+
+As usual, we like to to some benchmarking comparing running the openEO process in the backend and a local run. This was done especially for the UDF. The openEO moving average example was already explained above, and the local one is a function using *st_apply()* and the *stars* package. The access to the whole comparison script is [here](src/benchmarking.R) given. 
+
+it's important to mention that this is complicated to estimate once we were not able to access log files of vito's backend (the one used for this use case). Nevertheless, we did a rough comparison that could be potentially interesting for users to better understand the capabilities of openEO. We ran two comparisons in two different regions, being one small, Switzerland, and the other, much bigger, the whole Europe. This was done for the whole year of 2019 using Terrascope S5P data. The first comparison was a very simple one, taking into account the downloading time to obtain GeoTiffs. 
+
+It is important to mention that the Download internet speed used for the tests was around 30 Mgbts. The local moving average, which speed depends on the local computational power, was ran on a intel7 (7th generation), 16GB RAM, 4th cored Linux (Ubuntu 22.04) Notebook. 
+
+The second way to keep with the comparison was to check the time to run the local and backend's moving average separately. Locally, this is very simple to test. In the backend, this is tricky. What we did there was to check the job was registered as "running", and register the time, and when it got finished, we registered the time again. It's important to say that the status of the job was checked every 30 s, so there's a considerable error margin of approximately 2 minutes, when we sum all four runs required to download the data. 
+
+When running for country of Switzerland, it was found that the local stars moving average did the entire process, including downloading time, in 21 minutes, and the run of the stars script only, in 7 seconds. In vito's backend, the whole process took  approximately 26 min, and the moving average itself 4 min. As mentioned this is a very small cube, and when looking at performance, openEO might seem not so efficient. Although, the question remains how to download the data so easily ? Yeah... openEO is very relevant there too...  
+
+When we use the entire Europe as reference, the panorama swiftly changes. This get much more interesting for the openEO users. Unless you've access to much more RAM in your PC, it's highly doubted you could make it run locally. This will break almost any standand notebook around. In openEO, in the other hand, it does not only run, but it also does the job in 27 minutes (only the UDF, in roughly 5 min. 
 
 ## Dependencies
 

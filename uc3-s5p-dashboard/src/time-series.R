@@ -179,32 +179,32 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
   tryCatch({
 
   # submit mean
-  print("Trying synchronous process")
+  cat("Trying synchronous process")
   graph = suppressWarnings(as(datacube_mean,"Graph"))
   suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-mean.json"))
-  print("mean time series stored")
+  cat("mean time series stored")
 
   # submit max
   graph = suppressWarnings(as(datacube_max,"Graph"))
   suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-max.json"))
-  print("max time series stored")
+  cat("max time series stored")
 
   # submit moving average
   graph = suppressWarnings(as(datacube_ma,"Graph"))
   suppressWarnings(compute_result(graph = graph, output_file = "data/time-series-ma.json"))
-  print("moving average time series stored")
+  cat("moving average time series stored")
 
 # read json - add save option
   ts_mean = fromJSON(file = "data/time-series-mean.json")
   ts_max = fromJSON(file = "data/time-series-max.json")
   ts_ma = fromJSON(file = "data/time-series-ma.json")
-  print("time series read")
+  cat("time series read")
 
   }, error = function(e) {
 
     message(e)
-    print("Synchronous process failed : queuing computation...")
-    print("it may take a while... \n")
+    cat("Synchronous process failed : queuing computation...")
+    cat("it may take a while... \n")
     formats = list_file_formats()
 
     # submit mean
@@ -222,21 +222,21 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
       if (jobs[[job$id]]$status == 'finished'){
 
-        print("downloading results")
+        cat("downloading results")
 
         download_results(job = job$id, folder = "data/")
       }
 
       if (jobs[[job$id]]$status == 'error') {
 
-        print('error!')
+        cat('error!')
         break
 
       }
     }
 
     ts_mean = fromJSON(file = "data/timeseries.json")
-    print("mean time series read")
+    cat("mean time series read")
 
     # submit max
     result = p$save_result(data = datacube_max,
@@ -257,14 +257,14 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
       if (jobs[[job$id]]$status == 'error') {
 
-        print('error!')
+        cat('error!')
 
         break
       }
     }
 
     ts_max = fromJSON(file = "data/timeseries.json")
-    print("max time series read")
+    cat("max time series read")
 
     # submit moving average
     result = p$save_result(data = datacube_ma,
@@ -285,20 +285,20 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
       if (jobs[[job$id]]$status == 'error') {
 
-        print('error!')
+        cat('error!')
 
         break
       }
     }
 
     ts_ma = fromJSON(file = "data/timeseries.json")
-    print("moving average time series read")
+    cat("moving average time series read")
 
 }, warning = function(w) {
 
   message(e)
-  print("Synchronous process failed : queuing computation... \n")
-  print("it may take a while... \n")
+  cat("Synchronous process failed : queuing computation... \n")
+  cat("it may take a while... \n")
   formats = list_file_formats()
 
   # submit mean
@@ -316,21 +316,21 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
     if (jobs[[job$id]]$status == 'finished'){
 
-      print("downloading results")
+      cat("downloading results")
 
       download_results(job = job$id, folder = "data/")
     }
 
     if (jobs[[job$id]]$status == 'error') {
 
-      print('error!')
+      cat('error!')
       break
 
     }
   }
 
   ts_mean = fromJSON(file = "data/timeseries.json")
-  print("mean time series read")
+  cat("mean time series read")
 
   # submit max
   result = p$save_result(data = datacube_max,
@@ -351,14 +351,14 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
     if (jobs[[job$id]]$status == 'error') {
 
-      print('error!')
+      cat('error!')
 
       break
     }
   }
 
   ts_max = fromJSON(file = "data/timeseries.json")
-  print("max time series read")
+  cat("max time series read")
 
   # submit moving average
   result = p$save_result(data = datacube_ma,
@@ -379,20 +379,20 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
     if (jobs[[job$id]]$status == 'error') {
 
-      print('error!')
+      cat('error!')
 
       break
     }
   }
 
   ts_ma = fromJSON(file = "data/timeseries.json")
-  print("moving average time series read")
+  cat("moving average time series read")
 })
 
 }else{
 
-  print("queuing computation... \n")
-  print("it may take a while... \n")
+  cat("queuing computation... \n")
+  cat("it may take a while... \n")
   formats = list_file_formats()
 
   # submit mean
@@ -407,14 +407,14 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
   	if (jobs[[job$id]]$status == 'finished'){
 
-  	    print("downloading results")
+  	    cat("downloading results")
     		download_results(job = job$id, folder = "data/")
   	    break
   	}
 
   	if (jobs[[job$id]]$status == 'finished') {
 
-    		print('error!')
+    		cat('error!')
     		break
 
   	  }
@@ -443,12 +443,12 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
   if (jobs[[job$id]]$status == 'error') {
 
-    		print('error!')
+    		cat('error!')
     		break
 
   }}
   ts_max = fromJSON(file = "data/timeseries.json")
-  print("max time series read")
+  cat("max time series read")
   print(ts_max)
 
   # submit moving average
@@ -470,14 +470,14 @@ if ( (((e-w)+(n-s)) * 111) < 1000 ){
 
     if (jobs[[job$id]]$status == 'error') {
 
-      print('error!')
+      cat('error!')
 
       break
     }
   }
 
   ts_ma = fromJSON(file = "data/timeseries.json")
-  print("moving average time series read")
+  cat("moving average time series read")
   print(ts_ma)
   }
 
@@ -526,7 +526,7 @@ if (e <= 12.55 & w >= 10.35 & n <= 47.13 & s >= 46.10 &
     as.Date(date1) >= as.Date("2018-12-14") &
     as.Date(date2) <= as.Date("2021-12-31")){
 
-  print("adding local data to the plot")
+  cat("adding local data to the plot")
 
   library(readxl)
   library(dplyr)
@@ -576,7 +576,7 @@ if (e <= 12.55 & w >= 10.35 & n <= 47.13 & s >= 46.10 &
 
 } else{
 
-  print("no local data in the desired area")
+  cat("no local data in the desired area")
 
   time = c(time,
            seq(as.Date(date1), as.Date(date2), length.out=length(no2)),

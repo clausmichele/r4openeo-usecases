@@ -27,8 +27,8 @@ con = connect(host = "https://openeo.cloud")
 # login
 login()
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
+# Define UI
+ui <- suppressWarnings({fluidPage(
 
     theme = shinytheme("darkly"),
 
@@ -158,6 +158,7 @@ ui <- fluidPage(
     )#navbar
   )#fluidpage
 
+}) #suppressWarning
 # server
 server <- function(input, output) {
 
@@ -716,11 +717,11 @@ server <- function(input, output) {
                  seq(as.Date(date1), as.Date(date2), length.out=length(no2_max)),
                  seq(as.Date(date1), as.Date(date2), length.out=length(no2_ma)))
 
-        data = c(no2_k$y, no2, no2_max)
+        data = c(no2_k$y, no2, no2_max, no2_ma)
         group = c(rep("smoothed", length(no2_k$y)),
                   rep("raw", length(no2)),
                   rep("maximum", length(no2_max)),
-                  rep("moving avereage", length(no2_ma)))
+                  rep("moving average", length(no2_ma)))
       }
 
       df = data.frame(time, data, group)
