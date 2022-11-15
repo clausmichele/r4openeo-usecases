@@ -151,10 +151,10 @@ conventional forest change maps are not yet available.
 * R version
 * all packages and versions
 
-### Running a local UDF backend
+### Running a local UDF Service
 * Additionally to the R requirements: R-UDF python package
 * This environment file solves the dependencies via conda
-  * [environment.yml]("/local_udf/environment.yml")
+  * [environment.yml](/local_udf/environment.yml)
 
 ### Running on an openEO backend
 * openEO backend that supports the R-UDF service.
