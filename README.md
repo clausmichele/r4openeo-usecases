@@ -38,40 +38,34 @@ and R-UDF service
 
 ## UC2: Forest Break Detection
 
-:bulb: **Timeseries modelling on pixlel level via R-UDFs**
+:bulb: **Timeseries modelling on pixel level via R-UDFs**
 
-:warning: **ADAPT THIS TEXT TO BFAST USE CASE**
+Mountain forests produce a large number of ecosystem services that will likely be affected by climate
+change. In light of the possible rise in extreme climatic events, changes in the forest disturbance regime will
+be very detrimental to the economic system, protection against natural hazards and biodiversity. The
+extreme weather events in Northern Italy are a good example to underline the frequency and scale of these
+impacts: In spring 2017, vast areas totalling 800 ha of pines dried up in the Vinschgau Valley as a result of a
+severe drought in the previous two years combined with an increased vulnerability towards pest
+infestations. The north-eastern regions of Italy were hit by a storm event in autumn 2018 with wind gusts
+exceeding 200 km/h. The registered damage summed up to 42’500 ha and resulted in a growing stock
+volume of fallen trees of 8.5 million m³. In November 2019 strong snowfall and associated heavy snow load
+on trees resulted in extensive snow break within the province of South Tyrol. These examples are typical for
+the entire Alps and show the necessity to understand the impacts of climate change on the forest
+disturbance regime in the alpine region in order to evaluate the resilience of the forest ecosystem with
+respect to composition and cover density.
+Earth Observation is a key instrument for forest ecosystem monitoring, yet, up-to-date, there are no high
+spatial resolution maps available to characterize - and dynamically update - the small-scale forest
+disturbances for the Alpine region. Our proposed Forest Disturbance Service will make use of previous
+project developments (e.g. EU-GMES project EUFODOS) and employ Sentinel-2 data covering the period
+from 2016 to 2020 and employ time-series interpretation techniques such as `bfast` to detect breakpoints in
+the temporal profiles of vegetation indices.
+Following the same set-up as use-case 1, the second is adherent to a planned service “Forest Break Detection” in the ESA EO4alps - ECO4Alps project. The planned collaboration and exchange about input-data and methodological approach will take place with the WP coordinators both from Eurac Research and the Solenix GmbH. The main aim of this activity is to implement a similar setup as the use-case in the ECO4Alps project in an R-based environment. The study area will be the extent of the region where the Vaja Storm affected the south-eastern region of South Tyrol / Italy (approximately 600 km2). 
+In this use case we are planning to integrate EO data from Sentinel-2 retreive forest disturbances from 2016 to 2020 using the R-client as well as the R-UDF functionalities. This allows us to showcase and implement a prototype for time-series modelling based on time series break detection using the R-client and the OpenEO infrastructure. The added value of this use case is to:
 
-Phenology is the study of recurrent events occurring to living organisms. In case of vegetation, the plant
-phenology generally refers to the cyclic stages of the plant growth throughout the year, so called
-phenophases. These stages differ considerably based on the plant species and their distribution as well
-as external factors such as the temperature and precipitation. Scientific studies on plant phenology
-gained importance in vegetation studies during the past 20 years with a focus on the shifts of
-phenophases during the year. The goal is to evaluate episodical, seasonal or long-term changes in the
-plant growth linked to human impact or climatological changes. It has become evident that the shifts in
-these phases correspond to the predictions of climatological models and are generally visible throughout
-the globe. The high topographical changes, the diverse vegetation cover and the lack of in-situ data to
-validate those models in mountainous regions are at times misrepresented by the spatially coarse
-phenological prediction models. It is of high interest to produce a layer for the diverse phenophases for
-the alpine region in order to assess the temporal variability and thus to effectively mitigate present or
-future climatic impacts on the alpine vegetation. In order to predict the changes spatially consistent, EO
-data has proven to be very effective to derive land surface phenology (LSP) metrics using optical
-datasets.
-Following the same set-up as use-case 1, the second is adherent to a planned service “Forest Phenology”
-in the ESA EO4alps - ECO4Alps project. The planned collaboration and exchange about input-data and
-methodological approach will take place with the WP coordinators both from Eurac Research and the
-Solenix GmbH. The main aim of this activity is to implement a similar setup as the use-case in the
-ECO4Alps project in an R-based environment. The study area will be the extent of the Autonomous
-province of South Tyrol / Italy (approximately 7400 km2).
-In this use case we are planning to integrate EO data from Sentinel-2 as well as Landsat and adjacent
-geospatial layers (e.g. DEMs) in order to predict different phenophases of forest growth from 2016 to
-2020 using the R-client as well as the R-UDF functionalities. This allows us to showcase and implement
-a prototype for time-series modelling based on phenology using the R-client and the OpenEO
-infrastructure.
-The added value of this use case is to:
-- Propose an openEO-based implementation of forest phenology retrieval to regional partners.
-- Adjacent development to a scientific activity defined in a regional initiative (ECO4Alps)
-- Define showcases on how to implement time-series modelling through R client and R-UDFs
+- Propose an openEO-based implementation of forest disturbance detection to regional partners. 
+- Adjacent development to a scientific activity defined in a regional initiative (ECO4Alps).
+- Define showcases on how to implement time-series modelling through R client and R-UDFs.
+
 
 ## UC3: NO2 Monitoring
 
