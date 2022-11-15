@@ -99,6 +99,7 @@ The added value of this use case is to:
 - Verify the connection to openEO Platform.
 - Define and publish showcases on how to implement time-series modelling on low-resolution,
 noisy S5P data through R-UDFs
+- Provide a blueprint on how to use openEO, the R-Client, R-UDFs within an interactive dashboard.
 
 
 ## R-UDFs
