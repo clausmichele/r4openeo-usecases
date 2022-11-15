@@ -80,6 +80,9 @@ The data set:
 * openeo_platform
   * processgraph
   
+## Results
+Comparison of classification results using various processing methods
+![image](https://user-images.githubusercontent.com/44399454/201896154-7b7959a2-ff58-49bd-968c-b3e3bc6e6aa5.png)
 
 ## Dependencies
 
