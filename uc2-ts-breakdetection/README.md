@@ -138,7 +138,8 @@ parametrize a UDF without recoding it. This UDF allows to pass on bfast paramete
 such as level, value and start_monitor to parametrize the functin without recoding the UDF.
 Other methods could also be used by replacing the function in the UDF, e.g. for phenology analysis 
 or time series smoothing.
-It is especially valuable for on-demand scenarios, where small patches are analyzed ad-hoc.
+It is especially valuable for on-demand scenarios, where small patches are analyzed ad-hoc and 
+conventional forest change maps are not yet available.
 
 ## Outlook
 * The `bfast` process can be replaced by phenology packages like `phenopix` to study phenology. Which is also a pixel based time series modelling approach.
@@ -147,10 +148,14 @@ It is especially valuable for on-demand scenarios, where small patches are analy
 ## Dependencies
 
 ### Running locally in R (without UDF)
+* R version
+* all packages and versions
 
 ### Running a local UDF backend
+* Additionally to the R requirements: R-UDF python package
+* This environment file solves the dependencies via conda
+  * [environment.yml]("/local_udf/environment.yml")
 
 ### Running on an openEO backend
-* R version
-* RStudio version
-* all packages and versions
+* openEO backend that supports the R-UDF service.
+* The backend needs to have `bfast` and `lubridate` installed.
