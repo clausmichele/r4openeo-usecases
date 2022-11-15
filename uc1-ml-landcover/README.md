@@ -34,6 +34,10 @@ The data set:
 * 10 m resolution
 
 ## Extent
+### Test
+![image](https://user-images.githubusercontent.com/44399454/201882958-537b5ad8-20fa-455d-9b99-c2683879930d.png)
+
+### Bolzano
 ![image](https://user-images.githubusercontent.com/44399454/201881665-1f4ab6bb-cee5-4111-93a0-80f623d0815d.png)
 
 ## Timing
