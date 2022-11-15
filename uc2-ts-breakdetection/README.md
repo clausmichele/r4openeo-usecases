@@ -2,64 +2,51 @@
 
 ## Description
 This use case shows how R UDFs are used to do advanced time series modelling which is not available through native openEO processes. 
-In this use case the `bfast::bfastmonitor` break detection method is chosen to detect breaks in forested areas. 
+In this use case the `bfastmonitor` break detection method is chosen to detect breaks in forested areas. 
 It demonstrates a blue-print how to apply time series modelling on  a single pixel time series. 
-Additionally, it is shown how the `openEO` context parameter can be used to
+Additionally, it is shown how the openEO context parameter can be used to
 parametrize a UDF without recoding it. This UDF allows to pass on bfast parameters
 such as level, value and start_monitor to parametrize the functin without recoding the UDF.
 Other methods could also be used by replacing the function in the UDF, e.g. for phenology analysis 
 or time series smoothing.
 
-## Benchmarking
-### Experiment
-Four ways of producing the bfast forest break detection are carried out on two different AOIs. This is mainly done for benchmarking and for demonstrating the different ways of interacting with openEO platform, the R-Client and the R-UDF library. 
-
-Four ways:
-* local_r: The udf is run directly in R
-* local_udf: The udf is run on a local instance of the UDF service
-* openeo_eurac: The udf is run on Eurac Researchs openEO instance
-* openeo_platform: The udf is run on openEO platform (VITO dev backend) 
-
-Two AOIs:
-* test: A small test area within the vaja storm region for small scale testing. 100 by 100 pixels (10000 pixels), 1 km2
-* vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps project to test the bfast service there. 2238 by 2670 pixels (6 mio. pixels), 600 km2
-
-The data set:
+## Data and Extent
+*Data*
 * Sentinel-2 L2A collection
 * Cloud masking using S2 scene classification
 * 2016 to 2020
 * 10 m resolution
 
-### Timing
-#### Test
+*Extents*
+* test: A small test area within the vaja storm region for small scale testing. 100 by 100 pixels (10000 pixels), 1 km2
+* vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps project to test the bfast service there. 2238 by 2670 pixels (6 mio. pixels), 600 km2
 
-* local_r
-  * processgraph_data_local.R: 216 s (26126 cpusec)
-  * run_local_r_udf.r: 34 s
-  * total: 250 s
-* local_udf 
-  * processgraph_data_local.R: 216 s (26126 cpusec)
-  * run_bfast_udf.ipynb: 78 s
-  * total: 294 s
-* openeo_eurac
-  * processgraph_eurac_test.json: 118 s
-* openeo_platform
-  * processgraph_vito_test.json: NA (libs not installed)
+## Methods
 
-#### Vaja
+OpenEO native functions do not allow to cover specialized cases
+There are many software packages available that solve these problems.
+UDFs allow to use the capabilities of specialized methods and also combine them with
+custom refinements in arbitrary R code. 
+In this use case the timeseries modelling package `bfast` is used to estimate breaks
+in a NDVI timeseries. 
+The timeseries that is fed into `bfast` is created with native openEO processes. 
+The `bfast` method is then called within a `reduce_dimension` to operate on single 
+pixel locations along the time dimension.
 
-* local_r
-  * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
-  * run_local_r_udf.r: 4.8 h
-  * total: 6.1 h
-* local_udf 
-  * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
-  * run_bfast_udf.ipynb: NA (runs out of memory (96GB) after 1h15)
-  * total: NA
-* openeo_eurac
-  * processgraph_eurac_vaja.json: NA (currently error)
-* openeo_platform
-  * processgraph_vito_vaja.json: NA (libs not installed)
+The UDF can be coded so that the parametrization is taken care of via the openEO
+context parameter. This enables to pass different parameters to a function without
+replacing the whole code for the UDF. In this example the `bfast` parameters 
+`start_monitor` (when the monitoring period should start), 
+`val` (which value should be returned: breakpoint timing or magnitude of change),
+
+It is also showcased that two UDFs can be included in one processgraph and that the
+results can be used further. In this example it is shown that the breakpoint timing
+is refined with a threshold of the magnitude of change, so that only very certain
+breaks are kept.
+
+- process graph
+- bfast udf + context for parameters
+
 
 ## Results
 ### Compared to ECO4Alps
@@ -70,7 +57,6 @@ The data set:
   - Results in Readme
 - Explain difference in input data set
 - Explain difference in calculation
-
 
 ### On the fly calculation on Eurac backend
 The results of the use case can be computed directly on the fly on the 
@@ -85,15 +71,55 @@ estimating the magnitude of change and finally keeping the most probably detecte
 
 ![webviewer_eurac](./openeo_eurac/magnitude_masking/uc2_bfast.gif)
 
-## User Guide
+## Timings 
+### Experiment
+Four ways of producing the bfast forest break detection are carried out on the two different AOIs mentioned above. This is mainly done for prototyping, benchmarking and for demonstrating the different ways of interacting with openEO platform, the R-Client and the R-UDF library. 
 
-* Create the process graph for preparing your NDVI time series
+* local_r: The udf is run directly in R
+* local_udf: The udf is run on a local instance of the UDF service
+* openeo_eurac: The udf is run on Eurac Researchs openEO instance
+* openeo_platform: The udf is run on openEO platform (VITO dev backend) 
 
-* How to write the UDF
-Note: We are using `udf_chunked()`  because `bfastmonitor()` is running on arrays only. 
-It is not optimized for matrix usage like uc1 ml for example.
+### Runtime Test Extent
 
-* How to insert the UDF into the process graph
+* local_r
+  * processgraph_data_local.R: 216 s (26126 cpusec)
+  * run_local_r_udf.r: 34 s
+  * total: 250 s
+* local_udf 
+  * processgraph_data_local.R: 216 s (26126 cpusec)
+  * run_bfast_udf.ipynb: 78 s
+  * total: 294 s
+* openeo_eurac
+  * processgraph_eurac_test.json: 118 s
+* openeo_platform
+  * processgraph_vito_test.json: NA (libs not installed)
+
+### Runtime Vaja Extent
+
+* local_r
+  * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
+  * run_local_r_udf.r: 4.8 h
+  * total: 6.1 h
+* local_udf 
+  * processgraph_data_local.R: 4775 s (1.3 h) (933550 cpusec)
+  * run_bfast_udf.ipynb: NA (runs out of memory (96GB) after 1h15)
+  * total: NA
+* openeo_eurac
+  * processgraph_eurac_vaja.json: NA (currently error)
+* openeo_platform
+  * processgraph_vito_vaja.json: NA (libs not installed)
+
+## Conclusion
+This use case shows how R UDFs are used to do advanced time series modelling which is not available through native openEO processes. 
+In this use case the `bfastmonitor` break detection method is chosen to detect breaks in forested areas. 
+It demonstrates a blue-print how to apply time series modelling on  a single pixel time series. 
+Additionally, it is shown how the openEO context parameter can be used to
+parametrize a UDF without recoding it. This UDF allows to pass on bfast parameters
+such as level, value and start_monitor to parametrize the functin without recoding the UDF.
+Other methods could also be used by replacing the function in the UDF, e.g. for phenology analysis 
+or time series smoothing.
+
 
 ## Outlook
 * The `bfast` process can be replaced by phenology packages like `phenopix` to study phenology. Which is also a pixel based time series modelling approach.
