@@ -33,6 +33,9 @@ The data set:
 * Cloud masked with SCL
 * 10 m resolution
 
+## Extent
+![image](https://user-images.githubusercontent.com/44399454/201881665-1f4ab6bb-cee5-4111-93a0-80f623d0815d.png)
+
 ## Timing
 
 ### Test
