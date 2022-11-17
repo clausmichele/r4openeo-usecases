@@ -40,7 +40,7 @@ In this use case we are planning to integrate EO data from Sentinel-2 retreive f
 * test: A test area within the vaja storm region for small scale testing. 100 by 100 pixels (10000 pixels), 1 km2
 * vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps project to test the bfast service there. 2238 by 2670 pixels (6 mio. pixels), 600 km2
 
-![extents_uc2](./00_extent/extent_uc2.html)
+![extents_uc2](./00_extent/extent_uc2.jpg)
 
 ## Methods
 
