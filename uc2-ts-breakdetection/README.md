@@ -42,9 +42,9 @@ In this use case we are planning to integrate EO data from Sentinel-2 retreive f
 
 ## Methods
 
-OpenEO native functions do not allow to cover specialized cases
-There are many software packages available that solve these problems.
-UDFs allow to use the capabilities of specialized methods and also combine them with
+OpenEO native functions do not allow to cover specialized cases of time series modelling.
+There are many software packages available that are specifically designed to address these questions.
+R-UDFs allow to use the capabilities of specialized methods and also combine them with
 custom refinements in arbitrary R code. 
 In this use case the timeseries modelling package `bfast` is used to estimate breaks
 in a NDVI timeseries. 
@@ -56,7 +56,8 @@ The UDF can be coded so that the parametrization is taken care of via the openEO
 context parameter. This enables to pass different parameters to a function without
 replacing the whole code for the UDF. In this example the `bfast` parameters 
 `start_monitor` (when the monitoring period should start), 
-`val` (which value should be returned: breakpoint timing or magnitude of change),
+`val` (which value should be returned: breakpoint timing or magnitude of change)
+and `level` controlling the significane level of the detection.
 
 It is also showcased that two UDFs can be included in one processgraph and that the
 results can be used further. In this example it is shown that the breakpoint timing
@@ -79,7 +80,7 @@ breaks are kept.
 
 ### On the fly calculation on Eurac backend
 The results of the use case can be computed directly on the fly on the 
-Eurac backend by using this process graph (and reducing the extent to a relevant forest patch).
+Eurac backend by using [this process graph](https://github.com/Open-EO/r4openeo-usecases/blob/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/processgraph_eurac_test_magnitude_mask.json) (and reducing the extent to a relevant forest patch).
 This allows interactive and on the fly monitoring of forest patches. 
 The process graph is masking clouds, calculating the NDVI, detecting breakpoints in the timeseries, 
 estimating the magnitude of change and finally keeping the most probably detected breaktpoint timings.
@@ -125,7 +126,7 @@ Four ways of producing the bfast forest break detection are carried out on the t
   * run_bfast_udf.ipynb: NA (runs out of memory (96GB) after 1h15)
   * total: NA
 * openeo_eurac
-  * processgraph_eurac_vaja.json: NA (currently error)
+  * processgraph_eurac_vaja.json: 2 h
 * openeo_platform
   * processgraph_vito_vaja.json: NA (libs not installed)
 
