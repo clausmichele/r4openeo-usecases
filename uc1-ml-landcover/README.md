@@ -48,6 +48,8 @@ Classifcation was run with various experimental methods and the figure below sho
 ![image](https://user-images.githubusercontent.com/44399454/201896154-7b7959a2-ff58-49bd-968c-b3e3bc6e6aa5.png)
 
 For the validation of the different processing, the results were compared with each other and the table below shows the agreement between the classification runs.
+
+
 ![image](https://user-images.githubusercontent.com/44399454/202462174-642e8abd-3c72-4884-af6f-673c2e947c07.png)
 
 ## Timing
