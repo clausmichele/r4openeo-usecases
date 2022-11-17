@@ -40,7 +40,6 @@ The following table shows the band from Sentinel-2 used,
 whereas the next table shows all the features generated from all these Sentinel-2 bands.
 ![image](https://user-images.githubusercontent.com/44399454/202458916-a006009c-639b-4adf-8248-b9fda4864233.png)
 All these features were used to train the model in the case of this UC.
-
 ## Results
 Comparison of classification results using various processing methods
 ![image](https://user-images.githubusercontent.com/44399454/201896154-7b7959a2-ff58-49bd-968c-b3e3bc6e6aa5.png)
@@ -95,7 +94,7 @@ Four ways:
     * ~ sec
 * openeo_platform
   * processgraph
-  * 
+
 ## Conclusion
 
 ## Outlook
