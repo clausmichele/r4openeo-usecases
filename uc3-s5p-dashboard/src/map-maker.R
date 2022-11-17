@@ -30,8 +30,8 @@ p = processes()
 # user inputs
 country = 'switzerland'
 ## time extent
-date1 = "2020-07-01"
-date2 = "2020-07-10"
+date1 = "2019-07-01"
+date2 = "2019-07-10"
 ## plot date
 date = "2020-07-05"
 
@@ -137,7 +137,9 @@ while (jobs[[job$id]]$status == 'running' | jobs[[job$id]]$status == 'queued' | 
       break
 
     }
-  }
+}
+if (jobs[[job$id]]$status == 'error'){stop("Error in the backend")}
+
 files = list.files(path = "data/", pattern="\\.tif$")
 for (i in 1:length(files)){
     if (file.exists(paste0("data/", files[i]))) {

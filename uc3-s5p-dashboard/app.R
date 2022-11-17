@@ -369,7 +369,7 @@ server <- function(input, output) {
 
             if (jobs[[job$id]]$status == 'error') {
 
-              print('error!')
+              stop("Error in the backend")
               break
 
             }
@@ -397,7 +397,7 @@ server <- function(input, output) {
 
             if (jobs[[job$id]]$status == 'error') {
 
-              print('error!')
+              stop("Error in the backend")
 
               break
             }
@@ -425,7 +425,7 @@ server <- function(input, output) {
 
             if (jobs[[job$id]]$status == 'error') {
 
-              print('error!')
+              stop("Error in the backend")
 
               break
             }
@@ -463,7 +463,7 @@ server <- function(input, output) {
 
             if (jobs[[job$id]]$status == 'error') {
 
-              print('error!')
+              stop("Error in the backend")
               break
 
             }
@@ -491,7 +491,7 @@ server <- function(input, output) {
 
             if (jobs[[job$id]]$status == 'error') {
 
-              print('error!')
+              stop("Error in the backend")
 
               break
             }
@@ -519,7 +519,7 @@ server <- function(input, output) {
 
             if (jobs[[job$id]]$status == 'error') {
 
-              print('error!')
+              stop("Error in the backend")
 
               break
             }
@@ -610,7 +610,7 @@ server <- function(input, output) {
 
           if (jobs[[job$id]]$status == 'error') {
 
-            print('error!')
+            stop("Error in the backend")
 
             break
           }
@@ -857,6 +857,7 @@ server <- function(input, output) {
 
           }
         }
+        if (jobs[[job$id]]$status == 'error'){stop("Error in the backend")}
         files = list.files(path = "data/", pattern="\\.tif$")
         for (i in 1:length(files)){
           if (file.exists(paste0("data/", files[i]))) {
@@ -1002,7 +1003,7 @@ server <- function(input, output) {
 
           }
         }
-
+        if (jobs[[job$id]]$status == 'error'){stop("Error in the backend")}
         files = list.files(path = "data/")
           for (i in 1:length(files)){
             if (file.exists(paste0("data/", files[i]))) {
@@ -1062,6 +1063,5 @@ server <- function(input, output) {
         list(src = filename)
         }, deleteFile = FALSE) #renderplot
   } # function server
-
 # Run the application
 shinyApp(ui = ui, server = server)
