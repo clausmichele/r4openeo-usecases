@@ -111,6 +111,7 @@ Four ways:
   * processgraph
 
 ## Conclusion
+This use case shows how R UDFs are used to do prediction using any trained model varrying from Random Forest to Nueral Network which is not available through native openEO processes. With the current UDF processing the user is independent to train a model and choose feature sets accroding to their requiremnet and then run this model throught the R-UDF.
 
 ## Outlook
 
