@@ -36,10 +36,13 @@ An already trained model can be called in to the udf and can be deployed on data
 Two tests were done, one with a simple model based on 4 Sentinel-2 bands while the other has a model trained on intensive features extracted from 
 all the Sentinel-2 bands and multiple indices. The Corine layer is used in these cases to train the model.
 The following table shows the band from Sentinel-2 used,
+
 ![image](https://user-images.githubusercontent.com/44399454/202458681-12dfd750-1670-417b-a9e8-9c6b0416f275.png)
 whereas the next table shows all the features generated from all these Sentinel-2 bands.
+
 ![image](https://user-images.githubusercontent.com/44399454/202458916-a006009c-639b-4adf-8248-b9fda4864233.png)
-All these features were used to train the model in the case of this UC.
+ All these features were used to train the model in the case of this UC.
+
 ## Results
 Comparison of classification results using various processing methods
 ![image](https://user-images.githubusercontent.com/44399454/201896154-7b7959a2-ff58-49bd-968c-b3e3bc6e6aa5.png)
