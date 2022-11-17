@@ -38,14 +38,17 @@ all the Sentinel-2 bands and multiple indices. The Corine layer is used in these
 The following table shows the band from Sentinel-2 used,
 
 ![image](https://user-images.githubusercontent.com/44399454/202458681-12dfd750-1670-417b-a9e8-9c6b0416f275.png)
-whereas the next table shows all the features generated from all these Sentinel-2 bands.
+whereas the next table shows all the features generated from all these Sentinel-2 bands. All these features were used to train the model in this UC.
+
 
 ![image](https://user-images.githubusercontent.com/44399454/202458916-a006009c-639b-4adf-8248-b9fda4864233.png)
- All these features were used to train the model in the case of this UC.
 
 ## Results
-Comparison of classification results using various processing methods
+Classifcation was run with various experimental methods and the figure below shows the comparison of classification results using these various methods.
 ![image](https://user-images.githubusercontent.com/44399454/201896154-7b7959a2-ff58-49bd-968c-b3e3bc6e6aa5.png)
+
+For the validation of the different processing, the results were compared with each other and the table below shows the agreement between the classification runs.
+![image](https://user-images.githubusercontent.com/44399454/202462174-642e8abd-3c72-4884-af6f-673c2e947c07.png)
 
 ## Timing
 ### Experiment 
