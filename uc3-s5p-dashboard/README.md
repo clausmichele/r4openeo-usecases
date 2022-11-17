@@ -48,7 +48,7 @@ The parameters present are the date for the snapshot, the cloud cover quality fl
 
 ### Spacetime Animation
 
-![Example of Spacetime Animation](fig/spacetime-animation.shiny.png)
+![Example of Spacetime Animation](fig/spacetime-animation-shiny.png)
 
 Here, the user can create and visualise their own spatio-temporal animation of S5P NO2 data. Given a starting and ending date, as well as the quality flag for cloud cover and a given country name, the user may have their own personalised spacetime GIF ready for their usage. 
 
