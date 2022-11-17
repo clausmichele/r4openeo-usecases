@@ -2,8 +2,18 @@
 
 ## Description 
 
-This use case shows how R UDFs are used to do advanced time series modelling which is not available through native openEO processes.
+Land use and land cover classification is a basic application that uses machine learning for Earth Observation data. There are numerous models that are used
+for this purpose. There are alos a lot of ways to implement a classification form various open source softwares to packages in R and Python.
+There are continous efforts in this regard to improve the accuracies of such models and refine thr training samples and features to train the models. 
+Various class schemes are also present to provide results of various level of details.
+These classification maps can be used to identify temporal changes in such maps generated over the years to specify certain areas of interest where classes
+are changing naturally or enthroprogenically. This is important to understand the land surface dynamics and also iportant in cases like resource mangement for 
+agriculture areas and urban sprawl. 
+Thus this use case shows how R UDFs are used to do advanced time series modelling which is not available through native openEO processes.
 This particular use case focusses on implemenation of machine learning with an R UDF. 
+It is upto the user to develope from a basic model to a more instensive model based on the application and present training data.
+Giving the user the independence to train a model as required and then export and save it as an RDS object, in our examples these models objects are 
+uploaded and then called in the UDF from a Github URL.
 An already trained model can be called in to the udf and can be deployed on data with all the required features. 
 Two tests were done, one with a simple model based on 4 Sentinel-2 bands while the other has a model trained on intensive features extracted from 
 all the Sentinel-2 bands and multiple indices. The Corine layer is used in these cases to train the model.
