@@ -56,6 +56,9 @@ For the validation of the different processing, the results were compared with e
 The results of the use case can be computed directly on the fly on the Eurac backend by using [the process graph](https://github.com/Open-EO/r4openeo-usecases/blob/main/uc1-ml-landcover/eco4alps/openeo_eurac/Eco4alps_udf_OpenEO_Eurac.json). 
 This allows interactive and on the fly classification. The process graph includes masking clouds, generating of the feature dataset, then using the already trained model to predict results for the selected extent and finally displaying the results.
 
+![image](https://user-images.githubusercontent.com/44399454/202466490-58c2619a-0409-4987-8139-09fdd46fc236.png)
+
+
 ## Timing
 ### Experiment 
 
