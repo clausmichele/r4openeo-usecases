@@ -1,0 +1,236 @@
+---
+title: "r4openEO: UC2 - Compare to ECO4Alps"
+author: 
+ - Peter Zellner, Eurac Research
+date: "17/11/2022"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: TRUE
+---
+
+```{r, opts, include = FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+# Description
+The bfast forest disturbance use case has been chosen in order
+adjacently develop an openEO based workflow for forest disturbance
+monitoring. This workflow can be seen as an alternative approach - that
+makes use of the openEO platform capabilities - to the service developed
+in the ECO4Alps project.
+
+The comparison as presented in the following does not use the same input
+data. In the ECO4Alps Project the FORCE preprocessed "harmonized" LS8/S2
+ARD collection from openEO Platform is used (and forest masked). In
+R4openEO the S2 L2A collection processed with Sen2Cor on Eurac openEO
+backend is used. There are differences in the resolution (30m vs 10m),
+the preprocessing and the available time steps. These factors affect the
+results. The results from the ECO4Alps project are at this time still
+preliminary there is no service operationally available where they can
+be accessed (18.11.2022).
+
+# libs
+
+```{r, libs, message=FALSE, warning=FALSE}
+library(dplyr)
+library(sf)
+library(stars) 
+library(lubridate)
+library(mapview)
+library(leaflet)
+library(ggplot2)
+```
+
+# custom funs
+
+```{r, add_vaja_mosaic}
+add_vaja_wms = function(mv){
+  mv@map = mv@map %>%
+    addWMSTiles(group = 'EuracMosaic',
+                "http://saocompute.eurac.edu/geoserver/ows?SERVICE=WMS",
+                layers  = 'SENTINEL2:S2_MOSAIC_2019_ST_stretch_mask_3857',
+                options = c(WMSTileOptions(format = "image/png", transparent = TRUE)),
+                attribution = "Eurac Research") %>% 
+    mapview:::mapViewLayersControl(names = c("EuracMosaic"))
+  return(mv)
+}
+```
+
+# Load results
+
+Preliminary results ECO4Alps
+
+```{r, load_eco}
+pth_eco = "/mnt/CEPH_PROJECTS/ECO4Alps/Forest_Disturbances_SLX/03_results_slx/bfast_brks_refined_with_magnitude/brks_2016_2020_start_2018_level_0.001_magn_-0.2.tif"
+brks_eco = read_stars(pth_eco)
+brks_eco[[1]][brks_eco[[1]]==0] = NA
+```
+
+Results R4openEO
+
+```{r, load_r4o}
+pth_r4o = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/vaja/bfast_r_udf_mask.tiff"
+brks_r4o = read_stars(pth_r4o)
+brks_r4o[[1]][brks_r4o[[1]]==0] = NA
+
+pth_r4o_brks = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/vaja/bfast_r_udf_breakpoints.tiff"
+pth_r4o_magn = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/vaja/bfast_r_udf_magnitude.tiff"
+brks_r4o = read_stars(pth_r4o_brks)
+magn_r4o = read_stars(pth_r4o_magn)
+magn_r4o[[1]][magn_r4o[[1]] >= -0.2] = NA
+magn_r4o[[1]][magn_r4o[[1]] < -0.2] = 1
+brks_r4o = brks_r4o * magn_r4o
+
+```
+
+# Compare results
+
+## Map both results
+
+```{r, map_res}
+event_date = "2018-10-27"
+at = c(2018, decimal_date(as.Date(event_date)), 2019, 2020, 2021)
+mv_brks = mapview(brks_eco, at = at) + mapview(brks_r4o, at = at)
+mv_brks = add_vaja_wms(mv = mv_brks)
+mv_brks
+```
+
+## Map differences
+
+Make binary break masks
+
+```{r, make_break_masks}
+brks_r4o = stars::st_warp(src = brks_r4o, dest = brks_eco)
+brks_r4o_msk = brks_r4o
+brks_r4o_msk[[1]][!is.na(brks_r4o_msk[[1]])] = 1
+brks_r4o_msk[[1]][is.na(brks_r4o_msk[[1]])] = 0
+brks_eco_msk = brks_eco
+brks_eco_msk[[1]][!is.na(brks_eco_msk[[1]])] = 1
+brks_eco_msk[[1]][is.na(brks_eco_msk[[1]])] = 0
+```
+
+Map the difference
+
+```{r, map_diff}
+brks_max_ext = brks_eco_msk + brks_r4o_msk
+brks_max_ext[[1]][brks_max_ext[[1]] ==  0] = NA
+brks_max_ext_fac = cut(brks_max_ext, c(0,1,2), labels = c("no_diff", "diff"))
+mv_diff = mapview(brks_max_ext_fac, layer.name =" Diff. ECO4Alps - R4openEO")
+mv_diff = add_vaja_wms(mv_diff)
+
+mv_diff
+```
+
+## Count differences
+
+```{r, count_diff}
+cnt_diff = sum(brks_max_ext[[1]][brks_max_ext[[1]] ==  1], na.rm = T)
+cnt_same = sum(brks_max_ext[[1]][brks_max_ext[[1]] ==  2], na.rm = T)
+cnt_all = sum(brks_max_ext[[1]][!is.na(brks_max_ext[[1]])], na.rm = T)
+cnt_brks_diff = data.frame(cls = c("diff", "same"), freq = c(cnt_diff, cnt_same))
+cnt_brks_diff$freq_perc = cnt_brks_diff$freq / sum(cnt_brks_diff$freq) * 100
+
+plt_pie_diff = ggplot(cnt_brks_diff, aes(x="", y=freq_perc, fill=cls)) +
+  geom_bar(width = 1, stat = "identity", color = "black", size = 0.25) +
+  coord_polar("y", start=0) + ggtitle("difference between ECO4Alps and R4openEO brks")
+
+plt_pie_diff
+```
+
+## Show break timings
+
+Prepare break timings
+
+```{r, get_brk_timings}
+brks_eco_v = as.vector(brks_eco[[1]])
+brks_eco_v[brks_eco_v < 2018] = NA
+brks_eco_v = data.frame(source = "eco", brks = brks_eco_v)
+brks_r4o_v = as.vector(brks_r4o[[1]])
+brks_r4o_v = data.frame(source = "r4o", brks = brks_r4o_v)
+brks_r4o_v[brks_r4o_v < 2018] = NA
+brks_all_v = rbind(brks_eco_v, brks_r4o_v)
+```
+
+Plot break timings
+
+```{r, plot_brk_timings}
+brks_boxplot = ggplot(brks_all_v, aes(x = source, y = brks, group = source)) + 
+  geom_boxplot() + 
+  geom_hline(yintercept = lubridate::decimal_date(as.Date(event_date)), col = "red") + 
+  stat_summary(geom="text", fun=quantile,
+               aes(label=sprintf("%1.1f", ..y..)),
+               position=position_nudge(x=0.5), size=3.5)
+
+brks_boxplot
+```
+
+## Compare the lags of detection
+
+Prepare the lags
+
+```{r, lags_prepare}
+event_date = as.Date(event_date)
+min_brk = min(brks_all_v$brks, na.rm = T) %>% date_decimal() %>% as.Date()
+max_brk = max(brks_all_v$brks, na.rm = T) %>% date_decimal() %>% as.Date()
+date_cls = c(min_brk-1,
+             event_date, 
+             event_date+31, 
+             event_date+31*2, 
+             event_date+31*3, 
+             event_date+31*6, 
+             event_date+31*12, 
+             max_brk+1)
+date_cls_dec = decimal_date(date_cls)
+date_labels = c("before", "1mnth", "2mnth", "3mnth", "6mnth", "12mnth", ">12mnth")
+
+brks_all_v$cls = cut(brks_all_v$brks, breaks = date_cls_dec, labels = c(date_labels))
+acc_table = as.data.frame(table(brks_all_v$cls, brks_all_v$source, useNA = "always"), 
+                          stringsAsFactors = FALSE)
+acc_table = dplyr::filter(acc_table, Var2 != "<NA>") # remove weird NA column
+acc_table$date_cls = c(date_cls[-1], NA)
+acc_table$date_cls_dec = c(date_cls_dec[-1], NA)
+
+acc_table = acc_table %>%
+  group_by(Var2) %>%
+  mutate(freq_perc = Freq/sum(Freq)*100) %>% 
+  rename(freq = Freq, cls = Var1, source = Var2)
+
+acc_table$cls = factor(acc_table$cls, 
+                       levels = c("1mnth", "2mnth", "3mnth", "6mnth", 
+                                  "12mnth", ">12mnth", "no_break", "before", "NA"), 
+                       ordered = TRUE)
+
+acc_table_only_brks = acc_table %>% filter(!is.na(cls)) %>% 
+  group_by(source) %>% 
+  mutate(freq_perc = freq/sum(freq)*100)
+  
+```
+
+Plot the lags
+
+```{r, plot_hist}
+yrs = c(2018:2021)
+plt_hist_lags = ggplot(brks_all_v, aes(x=brks)) + 
+  geom_histogram(color="black", fill="white", 
+                 breaks=seq(from = min(yrs), to = max(yrs), by= 0.25)) +
+  geom_vline(xintercept = decimal_date(event_date), color = "red") +
+  facet_wrap(~ source)
+
+plt_hist_lags
+```
+
+## Conclusion
+
+- The general agreement on the most relevant disturbed forest patches is given. 
+- There is an agreement of 70% as the numbers show. The differences are mainly due to some detections in the S2 tile border zone and edges around detected patches.
+- The influence of the different data sources FORCE preprocessed "harmonized" LS8/S2 ARD collection from openEO Platform vs S2 L2A processed with Sen2Cor on Eurac openEO backend. Different preprocessing method, different resolution, different number of available time steps. There have been similar effects visible in comparing the FORCE preprocessed "harmonized" LS8/S2 ARD collection from openEO Platform to the NASA Harmonized LS8/S2 collection. The agreement is at the same level there.
+- The eastern part of the AOI is located at a S2 tile border 
+- It is striking that the timing of the detections are too early according to the R4openEO results. This has to be investigated further by comparing the NDVI time series in detail.
+- The workflow developed in R4openEO has the advantage that it can be run on demand and thus 
+yields results upon request. This is a very valuable asset for forest planners that want
+to monitor disturbances close to an potential disturbance event.
+
+
+
