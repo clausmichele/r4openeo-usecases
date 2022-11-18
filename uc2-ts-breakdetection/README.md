@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # UC2: Timeseries Break Detection
 
 :bulb: **Timeseries modelling on pixel level via R-UDFs**
@@ -61,12 +55,15 @@ infrastructure. The added value of this use case is to:
 
 ## Data and Extent
 
-*Data* \* Sentinel-2 L2A collection \* Cloud masking using S2 scene
-classification \* 2016 to 2020 \* 10 m resolution
+*Data* 
+* Sentinel-2 L2A collection 
+* Cloud masking using S2 sceneclassification 
+* 2016 to 2020 
+* 10 m resolution
 
-*Extents* \* test: A test area within the vaja storm region for small
-scale testing. 100 by 100 pixels (10000 pixels), 1 km2 \* vaja: the area
-where the vaja storm hit in 2018. This area is also used in the ECO4Alps
+*Extents* 
+* test: A test area within the vaja storm region for small scale testing. 100 by 100 pixels (10000 pixels), 1 km2 
+* vaja: the area where the vaja storm hit in 2018. This area is also used in the ECO4Alps
 project to test the bfast service there. 2238 by 2670 pixels (6 mio.
 pixels), 600 km2
 
