@@ -11,11 +11,11 @@ library("lubridate")
 
 # output path ------------------------------------------------------------------
 pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r_test.tif"
-pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r_vaja.tif"
+#pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/local_r/results/local_r_vaja.tif"
 
 # load input ndvi --------------------------------------------------------------
 pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/test.nc/openEO.nc"
-pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/vaja.nc/openEO.nc"
+#pth_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_data_local/vaja.nc/openEO.nc"
 ndvi = stars::read_stars(pth_ndvi, proxy = FALSE)
 
 # prepare ndvi object
@@ -35,6 +35,7 @@ source(pth_udf)
 level = c(0.001, 0.001)
 start_monitor = 2018
 dates = st_get_dimension_values(ndvi, "t")
+val = "breakpoint" #c("breakpoint", "magnitude") #"breakpoint"
 
 # apply udf --------------------------------------------------------------------
 a = Sys.time()
@@ -43,7 +44,7 @@ bfast_brks = st_apply(X = ndvi, MARGIN = c("x", "y"), function(x){
             dates = dates, 
             start_monitor = start_monitor, 
             level = level, 
-            val = "breakpoint")
+            val = val)
 })
 b = Sys.time()
 duration = b-a
