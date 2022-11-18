@@ -1,0 +1,240 @@
+{
+  "parameters": [],
+  "process_graph": {
+    "1": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "mask3"
+        },
+        "reducer": {
+          "process_graph": {
+            "iyc9jcayw": {
+              "process_id": "subtract",
+              "arguments": {
+                "x": {
+                  "from_node": "mlq4qsqo8"
+                },
+                "y": {
+                  "from_node": "l1qv43cek"
+                }
+              }
+            },
+            "l1qv43cek": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "B04"
+              }
+            },
+            "mlq4qsqo8": {
+              "process_id": "array_element",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "label": "B08"
+              }
+            },
+            "dl9xa11jz": {
+              "process_id": "add",
+              "arguments": {
+                "x": {
+                  "from_node": "mlq4qsqo8"
+                },
+                "y": {
+                  "from_node": "l1qv43cek"
+                }
+              }
+            },
+            "pzfxmxjrb": {
+              "result": true,
+              "process_id": "divide",
+              "arguments": {
+                "x": {
+                  "from_node": "iyc9jcayw"
+                },
+                "y": {
+                  "from_node": "dl9xa11jz"
+                }
+              }
+            }
+          }
+        },
+        "dimension": "bands"
+      }
+    },
+    "filter_bands_HDWRB9254S": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_OYDDW9386H"
+        },
+        "bands": [
+          "CLOUD_MASK"
+        ]
+      }
+    },
+    "apply2": {
+      "process_id": "apply",
+      "arguments": {
+        "process": {
+          "process_graph": {
+            "eq1": {
+              "result": true,
+              "process_id": "eq",
+              "arguments": {
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 0
+              }
+            }
+          }
+        },
+        "data": {
+          "from_node": "filter1"
+        }
+      }
+    },
+    "load_collection_OYDDW9386H": {
+      "process_id": "load_collection",
+      "arguments": {
+        "temporal_extent": [
+          "2016-01-01",
+          "2021-09-01"
+        ],
+        "spatial_extent": {
+          "east": 11.58,
+          "south": 46.25908,
+          "north": 46.49561,
+          "west": 11.32563
+        },
+        "id": "S2_L2A_ALPS",
+        "bands": [
+          "B04",
+          "B08",
+          "CLOUD_MASK"
+        ],
+        "properties": {}
+      }
+    },
+    "save_result_FGLXE6329D": {
+      "result": true,
+      "process_id": "save_result",
+      "arguments": {
+        "data": {
+          "from_node": "reduce1"
+        },
+        "format": "GTiff"
+      }
+    },
+    "apply_TIEIZ2309H": {
+      "process_id": "apply",
+      "arguments": {
+        "process": {
+          "process_graph": {
+            "eq_VGRVS9025T": {
+              "process_id": "eq",
+              "arguments": {
+                "x": {
+                  "from_parameter": "x"
+                },
+                "y": 0
+              }
+            },
+            "not1": {
+              "result": true,
+              "process_id": "not",
+              "arguments": {
+                "x": {
+                  "from_node": "eq_VGRVS9025T"
+                }
+              }
+            }
+          }
+        },
+        "data": {
+          "from_node": "filter_bands_HDWRB9254S"
+        }
+      }
+    },
+    "mask_SKROL9201R": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "filter2"
+        },
+        "mask": {
+          "from_node": "apply_TIEIZ2309H"
+        }
+      }
+    },
+    "filter1": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_OYDDW9386H"
+        },
+        "bands": [
+          "B04"
+        ]
+      }
+    },
+    "filter2": {
+      "process_id": "filter_bands",
+      "arguments": {
+        "data": {
+          "from_node": "load_collection_OYDDW9386H"
+        },
+        "bands": [
+          "B04",
+          "B08"
+        ]
+      }
+    },
+    "mask3": {
+      "process_id": "mask",
+      "arguments": {
+        "data": {
+          "from_node": "mask_SKROL9201R"
+        },
+        "mask": {
+          "from_node": "apply2"
+        }
+      }
+    },
+    "reduce1": {
+      "process_id": "reduce_dimension",
+      "arguments": {
+        "data": {
+          "from_node": "1"
+        },
+        "reducer": {
+          "process_graph": {
+            "run_udf_CJQWV0694G": {
+              "result": true,
+              "process_id": "run_udf",
+              "arguments": {
+                "data": {
+                  "from_parameter": "data"
+                },
+                "udf": "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/00_udfs/bfast_udf_handle_null.R",
+                "context": {
+                  "val": "magnitude",
+                  "chunk_size": 512,
+                  "start_monitor": "2018",
+                  "num_jobs": 12
+                },
+                "runtime": "R"
+              }
+            }
+          }
+        },
+        "dimension": "DATE"
+      }
+    }
+  }
+}
