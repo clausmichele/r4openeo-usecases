@@ -140,7 +140,7 @@ to monitor disturbances close to an potential disturbance event.
 The full comparison can be viewed in this
 [report](https://github.com/Open-EO/r4openeo-usecases/blob/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/vaja/compare_udf_eco4alps.html).
 
-![diff_map](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_diffmap.png)
+![diff_map](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_diffmap.jpg)
 
 ![lags](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_lags.png)
 
