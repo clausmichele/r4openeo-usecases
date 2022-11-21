@@ -114,7 +114,7 @@ Four ways:
 This use case shows how R UDFs are used to do prediction using any trained model varrying from Random Forest to Nueral Network which is not available through native openEO processes. With the current UDF processing the user is independent to train a model and choose feature sets accroding to their requiremnet and then run this model throught the R-UDF.
 
 ## Outlook
-
+The results provided good result over smaller tested area over Bolzano, In the next step it would be great to test with other models and comapring the same features as the ones used in Eco4Alps project. But would be imporatnt to see how the prediction looks like with different trained models. It would be an interesting test to run the UC for a much larger area covering the whole province.
 ## Dependencies
 
 * R version
