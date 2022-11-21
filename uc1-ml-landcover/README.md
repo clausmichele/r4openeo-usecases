@@ -34,7 +34,7 @@ Giving the user the independence to train a model as required and then export an
 uploaded and then called in the UDF from a Github URL.
 An already trained model can be called in to the udf and can be deployed on data with all the required features. 
 Two tests were done, one with a simple model based on 4 Sentinel-2 bands while the other has a model trained on intensive features extracted from 
-all the Sentinel-2 bands and multiple indices. The Corine layer is used in these cases to train the model.
+all the Sentinel-2 bands and multiple indices. The LUCAS layer is used in these cases to train the model.
 The following table shows the band from Sentinel-2 used,
 
 ![image](https://user-images.githubusercontent.com/44399454/202458681-12dfd750-1670-417b-a9e8-9c6b0416f275.png)
