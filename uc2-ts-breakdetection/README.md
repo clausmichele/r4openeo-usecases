@@ -142,12 +142,14 @@ The full comparison can be viewed in this
 
 The comparison of the input NDVI timeseries can be found in this [report](https://github.com/Open-EO/r4openeo-usecases/blob/main/uc2-ts-breakdetection/openeo_eurac/live_demo_eurac_mask_magn.html)
 
-
+The differences between ECO4Alps and R4openEO on a map.
 ![diff_map](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_diffmap.jpg)
 
+The timings of detections for the shown map.
 ![lags](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_lags.png)
 
-
+The NDVI time series of both projects for an example point where R4openEO detects the break to early (blue line = break R4openEO, red line = date of Vaja event, green line = break ECO4Alps). It becomes evident that the early detection in R4openEO happens at a time where no NDVI values are available in ECO4Alps, due to more rigorous quality masking, different pre-processing and cloud detection.
+![ndvi](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_ndvi.jpg)
 
 ### On the fly calculation on Eurac backend
 
