@@ -132,13 +132,16 @@ be accessed (18.11.2022).
 - There is an agreement of 70% as the numbers show. The differences are mainly due to some detections in the S2 tile border zone and edges around detected patches.
 - The influence of the different data sources FORCE preprocessed "harmonized" LS8/S2 ARD collection from openEO Platform vs S2 L2A processed with Sen2Cor on Eurac openEO backend. Different preprocessing method, different resolution, different number of available time steps. There have been similar effects visible in comparing the FORCE preprocessed "harmonized" LS8/S2 ARD collection from openEO Platform to the NASA Harmonized LS8/S2 collection. The agreement is at the same level there.
 - The eastern part of the AOI is located at a S2 tile border 
-- It is striking that the timing of the detections are too early according to the R4openEO results. This has to be investigated further by comparing the NDVI time series in detail.
+- It is striking that the timing of the detections are too early according to the R4openEO results. This was investigated further by comparing the NDVI time series in detail.
 - The workflow developed in R4openEO has the advantage that it can be run on demand and thus 
 yields results upon request. This is a very valuable asset for forest planners that want
 to monitor disturbances close to an potential disturbance event.
 
 The full comparison can be viewed in this
 [report](https://github.com/Open-EO/r4openeo-usecases/blob/main/uc2-ts-breakdetection/openeo_eurac/magnitude_masking/vaja/compare_udf_eco4alps.html).
+
+The comparison of the input NDVI timeseries can be found in this [report](https://github.com/Open-EO/r4openeo-usecases/blob/main/uc2-ts-breakdetection/openeo_eurac/live_demo_eurac_mask_magn.html)
+
 
 ![diff_map](./openeo_eurac/magnitude_masking/vaja/eco4alps_vs_r4openeo_diffmap.jpg)
 

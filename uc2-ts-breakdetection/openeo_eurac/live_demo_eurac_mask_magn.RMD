@@ -210,7 +210,7 @@ pnt = mapedit::drawFeatures(map = mapview(brks))
 
 Reuse the process graph up to ndvi calculation
 
-```{r, get_ndvi, eval=FALSE}
+```{r, get_ndvi, eval=TRUE}
 pg_json_ndvi = as(calc_ndvi, "Process")
 pg_json_ndvi
 ```
@@ -269,15 +269,17 @@ ndvi_px_df = data.frame(value = ndvi_px %>% pull() %>% c() %>% as.vector(),
 
 ```
 
-Plot the NDVI
+Plot the NDVI - red line = event date, blue line = r4openeo detection
 
 ```{r, plot_ndvi, message=FALSE, warning=FALSE}
 event_date = "2018-10-27"
+break_date = brks[st_transform(x = pnt, crs = st_crs(brks))] %>% pull() %>% c()
 
 plot_px = ggplot(ndvi_px_df, aes(x = dates, y = value)) + 
   geom_line() + 
   geom_point() + 
-  geom_vline(xintercept = as.Date(event_date), col = "red")
+  geom_vline(xintercept = as.Date(event_date), col = "red") +
+  geom_vline(xintercept = as.Date(lubridate::date_decimal(break_date)), col = "blue")
 
 plot_px
 
@@ -302,7 +304,7 @@ brks_eco[[1]][brks_eco[[1]]==0] = NA
 Map the breaks
 
 ```{r, map_brks}
-mapview(brks) + mapview(brks_eco)
+mapview(brks) + mapview(brks_eco) + mapview(pnt)
 ```
 
 Prepare breaks for plotting
@@ -317,12 +319,16 @@ brks_v[brks_v < 2018] = NA
 brks_all_v = rbind(brks_eco_v, brks_v)
 ```
 
-Plot break timings - the red line is the event date of the vaja storm
+Plot break timings - red line = event date of the vaja storm, blue line = r4openEO break, green line = eco4alps break
 
 ```{r, plot_brk_timings, message=FALSE, warning=FALSE}
+break_date_eco = brks_eco[st_transform(pnt, crs = st_crs(brks_eco))] %>% pull() %>% c()
+
 brks_boxplot = ggplot(brks_all_v, aes(x = source, y = brks, group = source)) + 
   geom_boxplot() + 
   geom_hline(yintercept = lubridate::decimal_date(as.Date(event_date)), col = "red") + 
+  geom_hline(yintercept = break_date, col = "blue") +
+  geom_hline(yintercept = break_date_eco, col = "green") +
   stat_summary(geom="text", fun=quantile,
                aes(label=sprintf("%1.1f", ..y..)),
                position=position_nudge(x=0.5), size=3.5)
@@ -330,7 +336,7 @@ brks_boxplot = ggplot(brks_all_v, aes(x = source, y = brks, group = source)) +
 brks_boxplot
 ```
 
-And as histogram - the red line is the event date of the vaja storm
+And as histogram - red line = event date of the vaja storm, blue line = r4openEO break, green line = eco4alps break
 
 ```{r, plot_brk_hist, message=FALSE, warning=FALSE}
 yrs = c(2018:2021)
@@ -338,6 +344,8 @@ plt_hist_lags = ggplot(brks_all_v, aes(x=brks)) +
   geom_histogram(color="black", fill="white", 
                  breaks=seq(from = min(yrs), to = max(yrs), by= 0.25)) +
   geom_vline(xintercept = lubridate::decimal_date(as.Date(event_date)), color = "red") +
+  geom_vline(xintercept = break_date, color = "blue") +
+  geom_vline(xintercept = break_date_eco, color = "green") +
   facet_wrap(~ source)
 
 plt_hist_lags
@@ -370,13 +378,15 @@ ndvi_px_df$src = "r4o"
 ndvi_all_df = rbind(ndvi_px_df, ndvi_eco_df)
 ```
 
-Plot the two NDVI time series - the red line is the event date of the vaja storm.
+Plot the two NDVI time series - red line = event date of the vaja storm, blue line = r4openEO break, green line = eco4alps break
 
 ```{r, plot_ndvi_eco, message=FALSE, warning=FALSE}
 plot_px2 = ggplot(ndvi_all_df, aes(x = dates, y = value, col = src)) + 
   geom_line() + 
   geom_point() + 
-  geom_vline(xintercept = as.Date(event_date), col = "red")
+  geom_vline(xintercept = as.Date(event_date), col = "red") + 
+  geom_vline(xintercept = as.Date(lubridate::date_decimal(break_date)), col = "blue") +
+  geom_vline(xintercept = as.Date(lubridate::date_decimal(break_date_eco)), col = "green")
 
 plot_px2
 ```
