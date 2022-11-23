@@ -29,7 +29,7 @@ library(stars)
 # connect to backend
 
 ```{r, connect}
-host = "https://openeo.eurac.edu" # "https://openeo.cloud" # "https://openeo-dev.vito.be"
+host = "https://openeo.eurac.edu" # "https://10.8.244.129:8443/" # # "https://openeo.cloud" # "https://openeo-dev.vito.be" #
 con = openeo::connect(host)
 login()
 

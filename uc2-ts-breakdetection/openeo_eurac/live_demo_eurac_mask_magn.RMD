@@ -1,0 +1,382 @@
+---
+title: "r4openEO: UC2 - Timeseries break detection"
+author: 
+ - Peter Zellner, Eurac Research
+date: "22/11/2022"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: TRUE
+---
+
+# Description
+
+Process graph for getting s2 ndvi from Eurac backend, masking the clouds, and running the bfast R-UDF for detecting breaks in the time series. Additionally refining the result with the magnitude of change! Using only one UDF that can be change it's output a ccording to the context that is passed through to it.
+
+-   extent: either test.json (100x100 px) or vaja.json
+-   time: 2016 to 2021
+
+# libs
+
+```{r, libs, message=FALSE, warning=FALSE}
+library(openeo)
+library(dplyr)
+library(sf)
+library(stars) 
+
+library(mapview)
+library(mapedit)
+library(ggplot2)
+```
+
+# connect to backend
+
+```{r, connect, eval=TRUE}
+host = "https://openeo.eurac.edu" # "https://openeo.cloud" # "https://openeo-dev.vito.be" #
+con = openeo::connect(host)
+
+```
+
+```{r, login, eval=FALSE}
+login()
+```
+
+```{r, check_connect, eval=TRUE}
+con$isConnected()
+con$isLoggedIn()
+describe_account()
+```
+
+# definitions
+
+output file
+
+⚠️ **Every new run on openEO needs a new name_out!**
+
+```{r, name_out}
+name_out = "test_magn_mask_3.tif" 
+file_format = "GTiff" # "GTiff" # "netCDF"
+pth_out = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results" 
+pth_out = file.path(pth_out, name_out)
+pth_out
+```
+
+path to spatial extent
+
+```{r, path_ext}
+pth_ext = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/00_extent/test.json"
+```
+
+path to udf
+
+```{r, pth_udf}
+pth_udf =  "https://raw.githubusercontent.com/Open-EO/r4openeo-usecases/main/uc2-ts-breakdetection/00_udfs/bfast_udf_handle_null.R"
+```
+
+# parameters
+
+```{r, params_pg}
+collection = "S2_L2A_T32TPS" #"S2_L2A_ALPS" 
+spatial_extent = jsonlite::read_json(pth_ext) 
+time_range = list("2016-01-01", "2021-01-01") 
+bands = c("B04_10m", "B08_10m", "SCL_20m") 
+bands_cloud = "SCL_20m"
+```
+
+# define process graph
+
+```{r, processgraph, eval=TRUE}
+p = openeo::processes()
+
+data = p$load_collection(id = collection, 
+                         spatial_extent = list(west = spatial_extent$spatial_extent$west, 
+                                               east = spatial_extent$spatial_extent$east, 
+                                               south = spatial_extent$spatial_extent$south, 
+                                               north = spatial_extent$spatial_extent$north),
+                         temporal_extent = time_range, bands = bands)
+
+data_clouds = p$filter_bands(data = data, bands = bands_cloud)
+
+fun_cloud_mask = function(data, context) { 
+  scl = data 
+  res = scl == 3 | scl == 8 | scl == 9 
+  return(res)
+  }
+
+cloud_mask = p$apply(data = data_clouds, process = fun_cloud_mask)
+
+mask_clouds = p$mask(data = data, mask = cloud_mask)
+
+calc_ndvi = p$reduce_dimension(data = mask_clouds, 
+                               dimension = "bands", 
+                               reducer = function(data, context) { 
+                                 red = data[1] 
+                                 nir = data[2] 
+                                 (nir-red)/(nir+red)})
+
+reduce_udf = p$reduce_dimension(data = calc_ndvi, 
+                                dimension = "DATE", # at Eurac it's called DATE, at VITO "time" or "t" 
+                                reducer = function(data, context){
+                                  p$run_udf(data = data, 
+                                            context = list(start_monitor = 2018),
+                                            udf = pth_udf, 
+                                            runtime = "R")})
+
+reduce_udf_magn = p$reduce_dimension(data = calc_ndvi, 
+                                dimension = "DATE",
+                                reducer = function(data, context){
+                                  p$run_udf(data = data, 
+                                            context = list(start_monitor = 2018, 
+                                                           val = "magnitude"),
+                                            udf = pth_udf, 
+                                            runtime = "R")})
+
+fun_magn_mask = function(data, context) { 
+  magn = data 
+  res = magn > -0.2 
+  return(res)
+  }
+
+magn_mask = p$apply(data = reduce_udf_magn, process = fun_magn_mask)
+
+mask_magn = p$mask(data = reduce_udf, mask = magn_mask)
+
+result = p$save_result(data = mask_magn, format=file_format) # "GTiff" #"netCDF"
+```
+
+# look at the pg
+
+```{r, look_at_pg, eval=TRUE}
+pg_json = as(result, "Process")
+pg_json
+```
+
+# create job
+
+create job
+
+```{r, create_job, eval=FALSE}
+job = create_job(graph = result, 
+                 title = name_out, 
+                 description = name_out, 
+                 format = file_format) 
+start_job(job = job$id)
+```
+
+status job
+
+```{r, status_job, eval=FALSE}
+status(job) # 3.5 min for test.json extent with 2 udfs
+```
+
+download
+
+```{r, dwnld, eval=FALSE}
+result_obj = list_results(job = job$id) 
+dwnld = download_results(job = job$id, folder = pth_out)
+```
+
+# Check Results
+
+First look
+
+```{r, static_pth_openEO, include=FALSE}
+dwnld = list(NA, NA)
+dwnld[[2]] = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results/test_magn_mask_3.tif/result.tiff"
+```
+
+```{r, quick_check, message=FALSE, warning=FALSE}
+file.size(dwnld[[2]])/1000000 # mb 
+brks = read_stars(dwnld[[2]]) 
+brks[[1]][brks[[1]]<2018] = NA
+mapview::mapview(brks)
+```
+
+# Get a NDVI time series from one of the breakpoints
+
+Select a point from the result
+
+```{r, get_point_static, include=FALSE}
+pnt = st_as_sf(data.frame(x = 11.52876, y = 46.43926), coords = c("x", "y"), crs = st_crs(4326)) # this is for knitting statically
+```
+
+```{r, get_point, eval=FALSE}
+pnt = mapedit::drawFeatures(map = mapview(brks))
+# pnt
+```
+
+⚠️ **This section shows how to reuse parts of a process graph**
+
+Reuse the process graph up to ndvi calculation
+
+```{r, get_ndvi, eval=FALSE}
+pg_json_ndvi = as(calc_ndvi, "Process")
+pg_json_ndvi
+```
+
+Update the extent
+
+```{r, update_extent, eval=TRUE}
+# updating the node data, will also update the downstream node calc_ndvi...
+data$parameters$spatial_extent
+data$parameters$spatial_extent = pnt # with an sf object
+data$parameters$spatial_extent
+```
+
+and the format for saving
+
+```{r, update_format, eval=TRUE}
+format_ts = "netCDF"
+result_ndvi = p$save_result(data = calc_ndvi, format = format_ts)
+```
+
+Look at the process graph to validate the changes have been made
+
+```{r, check_again, eval=FALSE}
+pg_json_ndvi = as(result_ndvi, "Process")
+pg_json_ndvi
+```
+
+Calculate the NDVI synchronously
+
+```{r, calc_ndvi, eval=FALSE}
+pth_out_ndvi = paste0(tools::file_path_sans_ext(pth_out), ".nc")
+a = Sys.time()
+compute_result(result_ndvi, output_file = pth_out_ndvi)
+b = Sys.time()-a
+b
+
+# job = create_job(graph = result, 
+#                  title = name_out, 
+#                  description = name_out, 
+#                  format = file_format) 
+# start_job(job = job$id)
+```
+
+Load the NDVI
+
+```{r, pth_out_ndvi, include=FALSE}
+# this is for knitting with existing results
+pth_out_ndvi = "~/git_projects/r4openeo-usecases/uc2-ts-breakdetection/openeo_eurac/results/test_magn_mask_3.nc"
+```
+
+```{r, load_ndvi, message=FALSE, warning=FALSE}
+#ndvi_px = read_ncdf(pth_out_ndvi)
+ndvi_px = read_stars(pth_out_ndvi)
+ndvi_px_df = data.frame(value = ndvi_px %>% pull() %>% c() %>% as.vector(), 
+                        dates = as.Date(st_get_dimension_values(ndvi_px, "time")))
+
+```
+
+Plot the NDVI
+
+```{r, plot_ndvi, message=FALSE, warning=FALSE}
+event_date = "2018-10-27"
+
+plot_px = ggplot(ndvi_px_df, aes(x = dates, y = value)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_vline(xintercept = as.Date(event_date), col = "red")
+
+plot_px
+
+# plot_px_plotly = plotly::ggplotly(plot_px)
+# plot_px_plotly
+```
+
+# Compare to ECO4Alps
+
+## Breaks
+
+Load ECO4Alps breaks
+
+```{r, setup_eco, message=FALSE, warning=FALSE}
+pth_eco = "/mnt/CEPH_PROJECTS/ECO4Alps/Forest_Disturbances_SLX/03_results_slx/bfast_brks_refined_with_magnitude/brks_2016_2020_start_2018_level_0.001_magn_-0.2.tif"
+brks_eco = read_stars(pth_eco)
+brks_eco = st_warp(src = brks_eco, dest = brks)
+brks_eco = brks_eco[st_bbox(brks)]
+brks_eco[[1]][brks_eco[[1]]==0] = NA
+```
+
+Map the breaks
+
+```{r, map_brks}
+mapview(brks) + mapview(brks_eco)
+```
+
+Prepare breaks for plotting
+
+```{r, hist}
+brks_eco_v = as.vector(brks_eco[[1]])
+brks_eco_v[brks_eco_v < 2018] = NA
+brks_eco_v = data.frame(source = "eco", brks = brks_eco_v)
+brks_v = as.vector(brks[[1]])
+brks_v = data.frame(source = "r4o", brks = brks_v)
+brks_v[brks_v < 2018] = NA
+brks_all_v = rbind(brks_eco_v, brks_v)
+```
+
+Plot break timings - the red line is the event date of the vaja storm
+
+```{r, plot_brk_timings, message=FALSE, warning=FALSE}
+brks_boxplot = ggplot(brks_all_v, aes(x = source, y = brks, group = source)) + 
+  geom_boxplot() + 
+  geom_hline(yintercept = lubridate::decimal_date(as.Date(event_date)), col = "red") + 
+  stat_summary(geom="text", fun=quantile,
+               aes(label=sprintf("%1.1f", ..y..)),
+               position=position_nudge(x=0.5), size=3.5)
+
+brks_boxplot
+```
+
+And as histogram - the red line is the event date of the vaja storm
+
+```{r, plot_brk_hist, message=FALSE, warning=FALSE}
+yrs = c(2018:2021)
+plt_hist_lags = ggplot(brks_all_v, aes(x=brks)) + 
+  geom_histogram(color="black", fill="white", 
+                 breaks=seq(from = min(yrs), to = max(yrs), by= 0.25)) +
+  geom_vline(xintercept = lubridate::decimal_date(as.Date(event_date)), color = "red") +
+  facet_wrap(~ source)
+
+plt_hist_lags
+```
+
+## NDVI time series
+
+Load NDVI time series ECO4Alps
+
+```{r, load_ndvi_eco, message=FALSE, warning=FALSE}
+pth_ndvi_eco = "/mnt/CEPH_PROJECTS/ECO4Alps/Forest_Disturbances_SLX/WeSendit-20220829120870/20220510-fd/20220510-fd/indices/"
+lst_ndvi_eco = list.files(path = pth_ndvi_eco, pattern = ".tif$", full.names = TRUE)
+dts_ndvi_eco = gsub(pattern =".*_([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])\\.tif$" , 
+                    replacement = "\\1", 
+                    x = lst_ndvi_eco)
+dts_ndvi_eco = as.Date(dts_ndvi_eco)
+ndvi_eco = read_stars(.x = lst_ndvi_eco, along = "time", proxy = TRUE)
+ndvi_eco = ndvi_eco[st_transform(pnt, crs = st_crs(ndvi_eco))]
+ndvi_eco_ts = st_as_stars(ndvi_eco) 
+ndvi_eco_df = data.frame(value = ndvi_eco_ts %>% pull() %>% c() %>% as.vector(), 
+                         dates = dts_ndvi_eco)
+
+```
+
+Combine the NDVI time series
+
+```{r, combine_ndvi}
+ndvi_eco_df$src = "eco"
+ndvi_px_df$src = "r4o"
+ndvi_all_df = rbind(ndvi_px_df, ndvi_eco_df)
+```
+
+Plot the two NDVI time series - the red line is the event date of the vaja storm.
+
+```{r, plot_ndvi_eco, message=FALSE, warning=FALSE}
+plot_px2 = ggplot(ndvi_all_df, aes(x = dates, y = value, col = src)) + 
+  geom_line() + 
+  geom_point() + 
+  geom_vline(xintercept = as.Date(event_date), col = "red")
+
+plot_px2
+```
